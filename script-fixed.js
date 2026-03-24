@@ -16,6 +16,12 @@ let finalTime = 0;
 let database = null;
 let livesRemaining = 3;
 
+// Détection Chrome uniquement (pas Edge)
+const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
+if (isChrome) {
+    document.body.classList.add('chrome-browser');
+}
+
 // Initialisation
 document.addEventListener('DOMContentLoaded', () => {
     displayCurrentDate();
@@ -1178,3 +1184,4 @@ function closeSeeYouTomorrowModal() {
     modal.classList.remove('show');
     modal.style.display = 'none';
 }
+
