@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku du Jour</title>
+    <link rel="stylesheet" href="styles-new.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sudoku du Jour</h1>
+            <div class="date" id="current-date"></div>
+            <button id="view-leaderboard-btn" class="btn btn-leaderboard">🏆 Voir le Classement</button>
+        </header>
+
+        <div class="game-info">
+            <div class="timer">
+                <span class="timer-label">⏱️ Temps:</span>
+                <span id="timer">00:00</span>
+            </div>
+            <div class="lives">
+                <span class="lives-label">❤️ Vies:</span>
+                <span id="lives">3</span>
+            </div>
+        </div>
+
+        <div class="sudoku-grid" id="sudoku-grid"></div>
+
+        <!-- Clavier numérique pour mobile -->
+        <div class="number-pad">
+            <button class="number-btn" data-number="1">1</button>
+            <button class="number-btn" data-number="2">2</button>
+            <button class="number-btn" data-number="3">3</button>
+            <button class="number-btn" data-number="4">4</button>
+            <button class="number-btn" data-number="5">5</button>
+            <button class="number-btn" data-number="6">6</button>
+            <button class="number-btn" data-number="7">7</button>
+            <button class="number-btn" data-number="8">8</button>
+            <button class="number-btn" data-number="9">9</button>
+            <button class="erase-btn" title="Effacer">✕</button>
+        </div>
+
+        <div class="controls">
+            <button id="notes-btn" class="btn btn-notes" title="Activer/Désactiver le mode notes">Notes</button>
+            <button id="undo-btn" class="btn btn-secondary" title="Annuler">↶</button>
+            <button id="redo-btn" class="btn btn-secondary" title="Refaire">↷</button>
+            <button id="hint-btn" class="btn btn-warning">Indice</button>
+        </div>
+
+        <div class="controls">
+            <button id="share-btn" class="btn btn-success" style="display:none;">Partager</button>
+            <button id="reset-btn" class="btn btn-danger">Recommencer</button>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <!-- Modal pour saisir le nom -->
+    <div id="name-modal" class="modal">
+        <div class="modal-content">
+            <h2>🎉 Félicitations !</h2>
+            <p>Vous avez terminé le Sudoku du jour !</p>
+            <div class="time-display">
+                <span class="timer-label">⏱️ Votre temps:</span>
+                <span id="final-time" class="final-time">00:00</span>
+            </div>
+            <div class="name-input-container">
+                <label for="player-name">Entrez votre nom pour enregistrer votre score :</label>
+                <input type="text" id="player-name" maxlength="10" placeholder="Votre nom" />
+            </div>
+            <button id="submit-score-btn" class="btn btn-primary">📊 Enregistrer mon score</button>
+            <button id="skip-score-btn" class="btn btn-secondary">Passer</button>
+        </div>
+    </div>
+
+    <!-- Modal pour Game Over -->
+    <div id="gameover-modal" class="modal">
+        <div class="modal-content gameover-content">
+            <h2>Perdu!</h2>
+            <p>Vous avez perdu toutes vos vies...</p>
+            <div class="gameover-message">
+                <p> Malheureusement, vous ne pouvez faire le Sudoku qu'une seule fois par jour.</p>
+                <p> Revenez demain!</p>
+            </div>
+            <button id="view-solution-btn" class="btn btn-secondary">Voir la solution</button>
+        </div>
+    </div>
+
+    <!-- Modal pour le classement -->
+    <div id="leaderboard-modal" class="modal">
+        <div class="modal-content leaderboard-content">
+            <span class="close-btn" id="close-leaderboard">&times;</span>
+            <h2>🏆 Classement Mondial</h2>
+            <div id="user-rank" class="user-rank"></div>
+            <div class="leaderboard-header">
+                <span class="rank-col">Rang</span>
+                <span class="name-col">Joueur</span>
+                <span class="time-col">Temps</span>
+                <span class="date-col">Date</span>
+            </div>
+            <div id="leaderboard-list" class="leaderboard-list">
+                <div class="loading">Chargement...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal À demain -->
+    <div id="seeYouTomorrow-modal" class="modal">
+        <div class="modal-content seeYouTomorrow-content">
+            <h2>À demain !</h2>
+            <p>Vous avez terminé le Sudoku du jour</p>
+            <div class="seeYouTomorrow-message">
+                <p> Bravo pour votre participation !</p>
+                <p> Un nouveau Sudoku vous attend demain</p>
+                <p> Revenez relever le défi !</p>
+            </div>
+            <button id="view-final-leaderboard-btn" class="btn btn-primary">🏆 Voir le classement</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="script-fixed.js"></script>
+</body>
+</html>
