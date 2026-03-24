@@ -22,14 +22,16 @@
 //   }
 // }
 
+// IMPORTANT: Remplacez ces valeurs par vos propres clés Firebase
+// Ne commitez JAMAIS vos vraies clés API dans un dépôt public!
 const firebaseConfig = {
-  apiKey: "AIzaSyC0QWx7sXzRP9GjxAZUfQG8NCrk248Mk6A",
-  authDomain: "sudoo-38033.firebaseapp.com",
-  databaseURL: "https://sudoo-38033-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "sudoo-38033",
-  storageBucket: "sudoo-38033.firebasestorage.app",
-  messagingSenderId: "876407813860",
-  appId: "1:876407813860:web:fd78f7543d61cf147f1ef1"
+  apiKey: "VOTRE_API_KEY",
+  authDomain: "VOTRE_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://VOTRE_PROJECT_ID-default-rtdb.firebaseio.com",
+  projectId: "VOTRE_PROJECT_ID",
+  storageBucket: "VOTRE_PROJECT_ID.appspot.com",
+  messagingSenderId: "VOTRE_MESSAGING_SENDER_ID",
+  appId: "VOTRE_APP_ID"
 };
 
 // Vérifier si Firebase est configuré
@@ -64,11 +66,11 @@ function initFirebase() {
 // EXEMPLE DE CONFIGURATION (À REMPLACER PAR VOS PROPRES VALEURS):
 // 
 // const firebaseConfig = {
-//     apiKey: "AIzaSyAbc123def456ghi789jkl012mno345pqr",
-//     authDomain: "sudoku-quotidien.firebaseapp.com",
-//     databaseURL: "https://sudoku-quotidien-default-rtdb.firebaseio.com",
-//     projectId: "sudoku-quotidien",
-//     storageBucket: "sudoku-quotidien.appspot.com",
-//     messagingSenderId: "123456789012",
-//     appId: "1:123456789012:web:abc123def456ghi789"
+//     apiKey: "VOTRE_API_KEY_ICI",
+//     authDomain: "votre-projet.firebaseapp.com",
+//     databaseURL: "https://votre-projet-default-rtdb.firebaseio.com",
+//     projectId: "votre-projet",
+//     storageBucket: "votre-projet.appspot.com",
+//     messagingSenderId: "VOTRE_SENDER_ID",
+//     appId: "VOTRE_APP_ID"
 // };
