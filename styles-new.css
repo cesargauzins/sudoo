@@ -216,54 +216,68 @@ body.dark-mode .erase-btn:hover {
     font-size: 0.85em;
 }
 
-/* Fix pour Edge et Firefox - ADAPTATIF SANS SCROLL */
+/* Fix pour Edge et Firefox - ADAPTATIF COMPLET SANS SCROLL */
 .edge-firefox-browser body {
-    padding: 2px 6px;
+    padding: 0;
     overflow: hidden;
 }
 
 .edge-firefox-browser .container {
-    padding: 3px;
+    padding: 2px;
     max-height: 100vh;
     height: 100vh;
-    border-radius: 12px;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    overflow: hidden;
 }
 
 .edge-firefox-browser header {
-    margin-bottom: 0;
+    margin-bottom: 1px;
     flex-shrink: 0;
 }
 
 .edge-firefox-browser h1 {
-    font-size: 0.95em;
+    font-size: 0.85em;
     margin-bottom: 0;
-    line-height: 1.1;
+    line-height: 1;
 }
 
 .edge-firefox-browser .date {
-    font-size: 0.65em;
-    margin-bottom: 2px;
+    font-size: 0.6em;
+    margin-bottom: 1px;
+    line-height: 1;
+}
+
+.edge-firefox-browser #view-leaderboard-btn {
+    padding: 2px 4px;
+    font-size: 0.6em;
+    margin-top: 1px;
+    min-height: auto;
+    line-height: 1.2;
 }
 
 .edge-firefox-browser .game-info {
-    padding: 2px;
-    margin-bottom: 2px;
-    gap: 6px;
+    padding: 1px;
+    margin-bottom: 1px;
+    gap: 4px;
     flex-shrink: 0;
 }
 
 .edge-firefox-browser .timer,
 .edge-firefox-browser .lives {
-    font-size: 0.75em;
-    gap: 3px;
+    font-size: 0.7em;
+    gap: 2px;
+}
+
+.edge-firefox-browser .timer-label,
+.edge-firefox-browser .lives-label {
+    font-size: 0.9em;
 }
 
 .edge-firefox-browser #timer,
 .edge-firefox-browser #lives {
-    font-size: 0.85em;
+    font-size: 0.8em;
 }
 
 .edge-firefox-browser .progress-container {
@@ -271,57 +285,56 @@ body.dark-mode .erase-btn:hover {
 }
 
 .edge-firefox-browser .sudoku-grid {
-    margin-bottom: 2px;
-    border: 2px solid #333;
+    margin-bottom: 1px;
+    border: 1px solid #333;
     width: 100%;
-    max-width: min(90vw, 90vh);
+    height: auto;
+    max-height: calc(100vh - 280px);
+    aspect-ratio: 1;
+    flex-shrink: 1;
     margin-left: auto;
     margin-right: auto;
-    flex-shrink: 1;
 }
 
 .edge-firefox-browser .cell {
-    font-size: 1em;
+    font-size: 0.95em;
     border: 0.5px solid #ddd;
 }
 
 .edge-firefox-browser .number-pad {
-    gap: 2px;
-    margin: 2px 0;
+    gap: 1px;
+    margin: 1px 0;
     flex-shrink: 0;
 }
 
 .edge-firefox-browser .number-btn,
 .edge-firefox-browser .erase-btn {
-    padding: 4px;
-    font-size: 0.85em;
-    min-height: 28px;
+    padding: 3px;
+    font-size: 0.75em;
+    min-height: 24px;
+    line-height: 1;
 }
 
 .edge-firefox-browser .controls {
-    gap: 2px;
-    margin-bottom: 2px;
+    gap: 1px;
+    margin-bottom: 1px;
     flex-shrink: 0;
 }
 
 .edge-firefox-browser .btn {
-    padding: 4px;
-    font-size: 0.7em;
-    min-height: 26px;
+    padding: 3px;
+    font-size: 0.65em;
+    min-height: 22px;
+    line-height: 1.2;
 }
 
 .edge-firefox-browser .message {
-    padding: 2px;
-    font-size: 0.65em;
-    min-height: 16px;
+    padding: 1px;
+    font-size: 0.6em;
+    min-height: 14px;
     margin-bottom: 0;
     flex-shrink: 0;
-}
-
-.edge-firefox-browser #view-leaderboard-btn {
-    padding: 3px 6px;
-    font-size: 0.65em;
-    margin-top: 2px;
+    line-height: 1.2;
 }
 
 header {
