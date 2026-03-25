@@ -16,10 +16,16 @@ let finalTime = 0;
 let database = null;
 let livesRemaining = 3;
 
-// Détection Chrome uniquement (pas Edge)
+// Détection navigateur
 const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
+const isEdge = /Edg/.test(navigator.userAgent);
+const isFirefox = /Firefox/.test(navigator.userAgent);
+
 if (isChrome) {
     document.body.classList.add('chrome-browser');
+}
+if (isEdge || isFirefox) {
+    document.body.classList.add('edge-firefox-browser');
 }
 
 // Initialisation
@@ -1184,4 +1190,3 @@ function closeSeeYouTomorrowModal() {
     modal.classList.remove('show');
     modal.style.display = 'none';
 }
-
