@@ -97,6 +97,7 @@ body.dark-mode .erase-btn:hover {
     max-height: calc(100vh - 30px);
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 /* Fix pour Chrome uniquement (pas Edge) */
@@ -213,6 +214,68 @@ body.dark-mode .erase-btn:hover {
 .chrome-browser #btn-leaderboard {
     padding: 7px 10px;
     font-size: 0.85em;
+}
+
+/* Fix pour Edge et Firefox */
+.edge-firefox-browser body {
+    padding: 5px 10px;
+}
+
+.edge-firefox-browser .container {
+    padding: 6px;
+    max-height: calc(100vh - 10px);
+}
+
+.edge-firefox-browser header {
+    margin-bottom: 2px;
+}
+
+.edge-firefox-browser h1 {
+    font-size: 1.3em;
+    margin-bottom: 1px;
+}
+
+.edge-firefox-browser .game-info {
+    padding: 5px;
+    margin-bottom: 4px;
+    gap: 15px;
+}
+
+.edge-firefox-browser .progress-container {
+    height: 20px;
+    margin-bottom: 8px;
+}
+
+.edge-firefox-browser .sudoku-grid {
+    margin-bottom: 5px;
+}
+
+.edge-firefox-browser .number-pad {
+    gap: 4px;
+    margin: 6px 0;
+}
+
+.edge-firefox-browser .number-btn,
+.edge-firefox-browser .erase-btn {
+    padding: 8px;
+    font-size: 1.1em;
+}
+
+.edge-firefox-browser .controls {
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.edge-firefox-browser .btn {
+    padding: 8px;
+    font-size: 0.9em;
+}
+
+.edge-firefox-browser .message {
+    padding: 6px;
+    font-size: 0.85em;
+    min-height: 30px;
+    margin-bottom: 4px;
 }
 
 header {
@@ -1086,6 +1149,152 @@ body.dark-mode .leaderboard-item:hover {
         display: none;
     }
 }
+
+.leaderboard-item.top-3 {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+}
+
+.leaderboard-item.top-3:nth-child(2) {
+    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+}
+
+.leaderboard-item.top-3:nth-child(3) {
+    background: linear-gradient(135deg, #cd7f32 0%, #e6a86a 100%);
+}
+
+.rank-col, .time-col, .date-col {
+    text-align: center;
+}
+
+.name-col {
+    text-align: left;
+    font-weight: 600;
+}
+
+.medal {
+    font-size: 1.5em;
+    margin-right: 5px;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
+}
+
+body.dark-mode .modal-content {
+    background: #0f3460;
+    color: #e4e4e4;
+}
+
+body.dark-mode .modal-content h2 {
+    color: #00d4ff;
+}
+
+body.dark-mode .gameover-content h2 {
+    color: #ef5350;
+}
+
+body.dark-mode .gameover-message {
+    background: linear-gradient(135deg, rgba(211, 47, 47, 0.2) 0%, rgba(229, 57, 53, 0.2) 100%);
+    border-color: #ef5350;
+}
+
+body.dark-mode .gameover-message p {
+    color: #ef5350;
+}
+
+body.dark-mode .seeYouTomorrow-content h2 {
+    color: #00d4ff;
+}
+
+body.dark-mode .seeYouTomorrow-message {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(102, 126, 234, 0.15) 100%);
+    border-color: #00d4ff;
+}
+
+body.dark-mode .seeYouTomorrow-message p {
+    color: #00d4ff;
+}
+
+body.dark-mode .name-input-container input {
+    background: #1a1a2e;
+    color: #e4e4e4;
+    border-color: #00d4ff;
+}
+
+body.dark-mode .leaderboard-header {
+    background: #16213e;
+    color: #e4e4e4;
+}
+
+body.dark-mode .leaderboard-item {
+    background: #1a1a2e;
+    border-color: #2d4059;
+    color: #e4e4e4;
+}
+
+body.dark-mode .leaderboard-item:hover {
+    background: #16213e;
+}
+
+@media (max-width: 600px) {
+    .leaderboard-header,
+    .leaderboard-item {
+        grid-template-columns: 60px 1fr 90px;
+        font-size: 0.9em;
+    }
+
+    .date-col {
+        display: none;
+    }
+}
+
+body.dark-mode .gameover-message p {
+    color: #ef5350;
+}
+
+body.dark-mode .seeYouTomorrow-content h2 {
+    color: #00d4ff;
+}
+
+body.dark-mode .seeYouTomorrow-message {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(102, 126, 234, 0.15) 100%);
+    border-color: #00d4ff;
+}
+
+body.dark-mode .seeYouTomorrow-message p {
+    color: #00d4ff;
+}
+
+body.dark-mode .name-input-container input {
+    background: #1a1a2e;
+    color: #e4e4e4;
+    border-color: #00d4ff;
+}
+
+body.dark-mode .leaderboard-header {
+    background: #16213e;
+    color: #e4e4e4;
+}
+
+body.dark-mode .leaderboard-item {
+    background: #1a1a2e;
+    border-color: #2d4059;
+    color: #e4e4e4;
+}
+
+body.dark-mode .leaderboard-item:hover {
+    background: #16213e;
+}
+
+@media (max-width: 600px) {
+    .leaderboard-header,
+    .leaderboard-item {
+        grid-template-columns: 60px 1fr 90px;
+        font-size: 0.9em;
+    }
 
     .date-col {
         display: none;
