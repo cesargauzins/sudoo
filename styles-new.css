@@ -218,64 +218,90 @@ body.dark-mode .erase-btn:hover {
 
 /* Fix pour Edge et Firefox */
 .edge-firefox-browser body {
-    padding: 5px 10px;
+    padding: 3px 8px;
 }
 
 .edge-firefox-browser .container {
-    padding: 6px;
-    max-height: calc(100vh - 10px);
+    padding: 4px;
+    max-height: calc(100vh - 6px);
+    border-radius: 15px;
 }
 
 .edge-firefox-browser header {
-    margin-bottom: 2px;
-}
-
-.edge-firefox-browser h1 {
-    font-size: 1.3em;
     margin-bottom: 1px;
 }
 
+.edge-firefox-browser h1 {
+    font-size: 1.1em;
+    margin-bottom: 0px;
+}
+
+.edge-firefox-browser .date {
+    font-size: 0.75em;
+}
+
 .edge-firefox-browser .game-info {
-    padding: 5px;
-    margin-bottom: 4px;
-    gap: 15px;
+    padding: 3px;
+    margin-bottom: 2px;
+    gap: 10px;
+}
+
+.edge-firefox-browser .timer,
+.edge-firefox-browser .lives {
+    font-size: 0.9em;
+    gap: 4px;
+}
+
+.edge-firefox-browser #timer,
+.edge-firefox-browser #lives {
+    font-size: 1em;
 }
 
 .edge-firefox-browser .progress-container {
-    height: 20px;
-    margin-bottom: 8px;
+    display: none;
 }
 
 .edge-firefox-browser .sudoku-grid {
-    margin-bottom: 5px;
+    margin-bottom: 3px;
+    border: 2px solid #333;
+}
+
+.edge-firefox-browser .cell {
+    font-size: 1.15em;
 }
 
 .edge-firefox-browser .number-pad {
-    gap: 4px;
-    margin: 6px 0;
+    gap: 3px;
+    margin: 3px 0;
 }
 
 .edge-firefox-browser .number-btn,
 .edge-firefox-browser .erase-btn {
-    padding: 8px;
-    font-size: 1.1em;
+    padding: 6px;
+    font-size: 1em;
 }
 
 .edge-firefox-browser .controls {
-    gap: 5px;
-    margin-bottom: 5px;
+    gap: 3px;
+    margin-bottom: 3px;
 }
 
 .edge-firefox-browser .btn {
-    padding: 8px;
-    font-size: 0.9em;
+    padding: 6px;
+    font-size: 0.8em;
 }
 
 .edge-firefox-browser .message {
-    padding: 6px;
+    padding: 4px;
+    font-size: 0.75em;
+    min-height: 20px;
+    margin-bottom: 2px;
+}
+
+.edge-firefox-browser #view-leaderboard-btn {
+    padding: 6px 10px;
     font-size: 0.85em;
-    min-height: 30px;
-    margin-bottom: 4px;
+    margin-top: 0;
 }
 
 header {
@@ -1300,3 +1326,4 @@ body.dark-mode .leaderboard-item:hover {
         display: none;
     }
 }
+
