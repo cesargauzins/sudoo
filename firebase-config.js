@@ -36,8 +36,9 @@ const firebaseConfig = {
 
 // Vérifier si Firebase est configuré
 function isFirebaseConfigured() {
-    return firebaseConfig.apiKey !== "VOTRE_API_KEY" && 
-           firebaseConfig.databaseURL !== "VOTRE_DATABASE_URL";
+    return firebaseConfig.apiKey && 
+           firebaseConfig.apiKey !== "VOTRE_API_KEY" && 
+           firebaseConfig.apiKey.length > 20;
 }
 
 // Initialiser Firebase
