@@ -97,6 +97,7 @@ body.dark-mode .erase-btn:hover {
     max-height: calc(100vh - 30px);
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 /* Fix pour Chrome uniquement (pas Edge) */
@@ -213,6 +214,114 @@ body.dark-mode .erase-btn:hover {
 .chrome-browser #btn-leaderboard {
     padding: 7px 10px;
     font-size: 0.85em;
+}
+
+/* Fix pour Edge et Firefox - ADAPTATIF SANS SCROLL */
+.edge-firefox-browser body {
+    padding: 2px 6px;
+    overflow: hidden;
+}
+
+.edge-firefox-browser .container {
+    padding: 3px;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.edge-firefox-browser header {
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.edge-firefox-browser h1 {
+    font-size: 0.95em;
+    margin-bottom: 0;
+    line-height: 1.1;
+}
+
+.edge-firefox-browser .date {
+    font-size: 0.65em;
+    margin-bottom: 2px;
+}
+
+.edge-firefox-browser .game-info {
+    padding: 2px;
+    margin-bottom: 2px;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.edge-firefox-browser .timer,
+.edge-firefox-browser .lives {
+    font-size: 0.75em;
+    gap: 3px;
+}
+
+.edge-firefox-browser #timer,
+.edge-firefox-browser #lives {
+    font-size: 0.85em;
+}
+
+.edge-firefox-browser .progress-container {
+    display: none;
+}
+
+.edge-firefox-browser .sudoku-grid {
+    margin-bottom: 2px;
+    border: 2px solid #333;
+    width: 100%;
+    max-width: min(90vw, 90vh);
+    margin-left: auto;
+    margin-right: auto;
+    flex-shrink: 1;
+}
+
+.edge-firefox-browser .cell {
+    font-size: 1em;
+    border: 0.5px solid #ddd;
+}
+
+.edge-firefox-browser .number-pad {
+    gap: 2px;
+    margin: 2px 0;
+    flex-shrink: 0;
+}
+
+.edge-firefox-browser .number-btn,
+.edge-firefox-browser .erase-btn {
+    padding: 4px;
+    font-size: 0.85em;
+    min-height: 28px;
+}
+
+.edge-firefox-browser .controls {
+    gap: 2px;
+    margin-bottom: 2px;
+    flex-shrink: 0;
+}
+
+.edge-firefox-browser .btn {
+    padding: 4px;
+    font-size: 0.7em;
+    min-height: 26px;
+}
+
+.edge-firefox-browser .message {
+    padding: 2px;
+    font-size: 0.65em;
+    min-height: 16px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.edge-firefox-browser #view-leaderboard-btn {
+    padding: 3px 6px;
+    font-size: 0.65em;
+    margin-top: 2px;
 }
 
 header {
@@ -1035,6 +1144,157 @@ body.dark-mode .gameover-content h2 {
 body.dark-mode .gameover-message {
     background: linear-gradient(135deg, rgba(211, 47, 47, 0.2) 0%, rgba(229, 57, 53, 0.2) 100%);
     border-color: #ef5350;
+}
+
+body.dark-mode .gameover-message p {
+    color: #ef5350;
+}
+
+body.dark-mode .seeYouTomorrow-content h2 {
+    color: #00d4ff;
+}
+
+body.dark-mode .seeYouTomorrow-message {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(102, 126, 234, 0.15) 100%);
+    border-color: #00d4ff;
+}
+
+body.dark-mode .seeYouTomorrow-message p {
+    color: #00d4ff;
+}
+
+body.dark-mode .name-input-container input {
+    background: #1a1a2e;
+    color: #e4e4e4;
+    border-color: #00d4ff;
+}
+
+body.dark-mode .leaderboard-header {
+    background: #16213e;
+    color: #e4e4e4;
+}
+
+body.dark-mode .leaderboard-item {
+    background: #1a1a2e;
+    border-color: #2d4059;
+    color: #e4e4e4;
+}
+
+body.dark-mode .leaderboard-item:hover {
+    background: #16213e;
+}
+
+@media (max-width: 600px) {
+    .leaderboard-header,
+    .leaderboard-item {
+        grid-template-columns: 60px 1fr 90px;
+        font-size: 0.9em;
+    }
+
+    .date-col {
+        display: none;
+    }
+}
+
+.leaderboard-item.top-3 {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+}
+
+.leaderboard-item.top-3:nth-child(2) {
+    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+}
+
+.leaderboard-item.top-3:nth-child(3) {
+    background: linear-gradient(135deg, #cd7f32 0%, #e6a86a 100%);
+}
+
+.rank-col, .time-col, .date-col {
+    text-align: center;
+}
+
+.name-col {
+    text-align: left;
+    font-weight: 600;
+}
+
+.medal {
+    font-size: 1.5em;
+    margin-right: 5px;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
+}
+
+body.dark-mode .modal-content {
+    background: #0f3460;
+    color: #e4e4e4;
+}
+
+body.dark-mode .modal-content h2 {
+    color: #00d4ff;
+}
+
+body.dark-mode .gameover-content h2 {
+    color: #ef5350;
+}
+
+body.dark-mode .gameover-message {
+    background: linear-gradient(135deg, rgba(211, 47, 47, 0.2) 0%, rgba(229, 57, 53, 0.2) 100%);
+    border-color: #ef5350;
+}
+
+body.dark-mode .gameover-message p {
+    color: #ef5350;
+}
+
+body.dark-mode .seeYouTomorrow-content h2 {
+    color: #00d4ff;
+}
+
+body.dark-mode .seeYouTomorrow-message {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(102, 126, 234, 0.15) 100%);
+    border-color: #00d4ff;
+}
+
+body.dark-mode .seeYouTomorrow-message p {
+    color: #00d4ff;
+}
+
+body.dark-mode .name-input-container input {
+    background: #1a1a2e;
+    color: #e4e4e4;
+    border-color: #00d4ff;
+}
+
+body.dark-mode .leaderboard-header {
+    background: #16213e;
+    color: #e4e4e4;
+}
+
+body.dark-mode .leaderboard-item {
+    background: #1a1a2e;
+    border-color: #2d4059;
+    color: #e4e4e4;
+}
+
+body.dark-mode .leaderboard-item:hover {
+    background: #16213e;
+}
+
+@media (max-width: 600px) {
+    .leaderboard-header,
+    .leaderboard-item {
+        grid-template-columns: 60px 1fr 90px;
+        font-size: 0.9em;
+    }
+
+    .date-col {
+        display: none;
+    }
 }
 
 body.dark-mode .gameover-message p {

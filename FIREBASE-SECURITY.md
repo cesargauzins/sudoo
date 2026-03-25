@@ -1,37 +1,72 @@
 # Configuration Firebase Sécurisée
 
-## ⚠️ IMPORTANT - Sécurité
+## ℹ️ À propos des clés Firebase Frontend
 
-**NE JAMAIS** committer vos vraies clés API Firebase dans un dépôt Git public!
+**Les clés API Firebase pour le frontend sont publiques par design.**
+
+- ✅ Ces clés sont faites pour être exposées dans le code client
+- ✅ La vraie sécurité vient des **règles Firebase** dans la console
+- ✅ Tous les sites web utilisant Firebase exposent ces clés
+- ✅ Ce ne sont PAS des clés admin (pas d'accès privilégié)
+
+**Source officielle** : [Firebase Documentation](https://firebase.google.com/docs/projects/api-keys)
+
+> "Unlike how API keys are typically used, API keys for Firebase services are not used to control access to backend resources; that can only be done with Firebase Security Rules."
+
+## ⚠️ Ce qu'il faut vraiment protéger
+
+- ❌ **Service Account Keys** (clés admin backend) - NE JAMAIS committer!
+- ❌ **Variables d'environnement sensibles** (.env avec secrets)
+- ✅ **Clés Firebase frontend** (apiKey, etc.) - OK pour Git
 
 ## Instructions de Configuration
 
-1. **Copiez le fichier de configuration**:
-   ```bash
-   cp firebase-config.js firebase-config.local.js
-   ```
+**Pour un site statique (GitHub Pages, Netlify, etc.)** :
 
-2. **Modifiez `firebase-config.local.js`** avec vos vraies clés Firebase obtenues depuis:
-   - https://console.firebase.google.com/
-   - Paramètres du projet > Applications Web
+1. **Mettez vos clés Firebase dans `firebase-config.js`**
+2. **Configurez les règles de sécurité dans la Console Firebase** (voir GUIDE-FIREBASE.md)
+3. **Commitez et pushez** : vos règles Firebase protègent votre base
 
-3. **Mettez à jour `index.html`** pour utiliser votre fichier local:
-   ```html
-   <script src="firebase-config.local.js"></script>
-   ```
+**Pour un projet privé sensible** :
 
-4. Le fichier `firebase-config.local.js` est déjà dans `.gitignore` et ne sera pas commité.
+1. Créez `firebase-config.local.js` avec vos clés
+2. Ajoutez-le à `.gitignore`  
+3. Utilisez `firebase-config.js` avec des placeholders pour Git
 
-## Rotation des Clés Compromises
+## 🔒 Vraie Sécurité = Règles Firebase
 
-Si vos clés ont été exposées publiquement:
+La protection de votre base de données se fait dans la Console Firebase avec des règles comme :
 
-1. Allez dans la [Console Firebase](https://console.firebase.google.com/)
-2. Sélectionnez votre projet
-3. Allez dans **Paramètres du projet** > **Clés d'API**
-4. Supprimez l'ancienne clé et créez-en une nouvelle
-5. Mettez à jour votre fichier `firebase-config.local.js`
+```json
+{
+  "rules": {
+    "scores": {
+      "$date": {
+        ".read": true,
+        "$scoreId": {
+          ".write": true,
+          ".validate": "newData.hasChildren(['name', 'time'])"
+        }
+      }
+    }
+  }
+}
+```
 
-## Alternative: Variables d'Environnement
+Ces règles empêchent :
+- ✅ Écriture en dehors de `/scores/`
+- ✅ Données invalides (sans nom ou temps)
+- ✅ Abus et spam
 
-Pour une meilleure sécurité en production, utilisez des variables d'environnement et un outil de build comme Vite, Webpack, ou Parcel.
+## Protection Additionnelle
+
+**Limiter les domaines autorisés** (recommandé) :
+
+1. Console Firebase → **Paramètres du projet**
+2. Section **Clés d'API** → Restrictions
+3. Ajoutez votre domaine (ex: `votre-site.github.io`)
+4. Cela empêche l'utilisation de vos clés sur d'autres sites
+
+**App Check** (optionnel pour anti-spam) :
+
+Firebase App Check peut limiter les abus en vérifiant que les requêtes viennent de votre app légitime.

@@ -22,16 +22,16 @@
 //   }
 // }
 
-// IMPORTANT: Remplacez ces valeurs par vos propres clés Firebase
-// Ne commitez JAMAIS vos vraies clés API dans un dépôt public!
+// Configuration Firebase pour le site en ligne
+// Note: Ces clés sont sécurisées par les règles Firebase dans la console
 const firebaseConfig = {
-  apiKey: "VOTRE_API_KEY",
-  authDomain: "VOTRE_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://VOTRE_PROJECT_ID-default-rtdb.firebaseio.com",
-  projectId: "VOTRE_PROJECT_ID",
-  storageBucket: "VOTRE_PROJECT_ID.appspot.com",
-  messagingSenderId: "VOTRE_MESSAGING_SENDER_ID",
-  appId: "VOTRE_APP_ID"
+  apiKey: "AIzaSyCM7fDi1IJraLuPcbxTZihFG1LerTmHxIs",
+  authDomain: "sudoo-a3714.firebaseapp.com",
+  databaseURL: "https://sudoo-a3714-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "sudoo-a3714",
+  storageBucket: "sudoo-a3714.firebasestorage.app",
+  messagingSenderId: "548895008144",
+  appId: "1:548895008144:web:22810c005302a80a133f15"
 };
 
 // Vérifier si Firebase est configuré
