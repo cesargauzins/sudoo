@@ -1086,3 +1086,8 @@ body.dark-mode .leaderboard-item:hover {
         display: none;
     }
 }
+
+    .date-col {
+        display: none;
+    }
+}
