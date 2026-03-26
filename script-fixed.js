@@ -1,1448 +1,1415 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px 20px;
-    transition: background 0.3s ease;
-    overflow: hidden;
-}
-
-body.dark-mode {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-}
-
-body.dark-mode .container {
-    background: #0f3460;
-    color: #e4e4e4;
-}
-
-body.dark-mode h1 {
-    color: #00d4ff;
-}
-
-body.dark-mode .date {
-    color: #b0b0b0;
-}
-
-body.dark-mode .cell {
-    background: #1a1a2e;
-    color: #e4e4e4;
-    border-color: #2d4059;
-}
-
-body.dark-mode .cell.fixed {
-    background: #16213e;
-    color: #9ba4b5;
-}
-
-body.dark-mode .cell.same-region {
-    background: rgba(240, 248, 255, 0.37) !important;
-}
-
-body.dark-mode .cell.same-number {
-    background: rgba(173, 216, 230, 0.25) !important;
-}
-
-body.dark-mode .cell.error {
-    background: rgba(211, 47, 47, 0.3) !important;
-    color: #ef5350 !important;
-}
-
-body.dark-mode .game-info {
-    background: #16213e;
-}
-
-body.dark-mode .progress-container {
-    background: #16213e;
-}
-
-body.dark-mode .number-btn, body.dark-mode .erase-btn {
-    background: #1a1a2e;
-    border-color: #00d4ff;
-    color: #00d4ff;
-}
-
-body.dark-mode .number-btn:hover, body.dark-mode .erase-btn:hover {
-    background: #00d4ff;
-    color: #1a1a2e;
-}
-
-body.dark-mode .erase-btn {
-    background: #c62828;
-    border-color: #e53935;
-    color: white;
-}
-
-body.dark-mode .erase-btn:hover {
-    background: #e53935;
-    border-color: #ef5350;
-}
-
-.container {
-    background: white;
-    border-radius: 24px;
-    padding: 8px;
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25), 0 10px 30px rgba(102, 126, 234, 0.15);
-    max-width: 600px;
-    width: 100%;
-    max-height: calc(100vh - 30px);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-/* Fix pour Chrome uniquement (pas Edge) */
-.chrome-browser body {
-    padding: 3px 10px;
-}
-
-.chrome-browser .container {
-    padding: 5px;
-    max-height: calc(100vh - 6px);
-}
-
-.chrome-browser header {
-    margin-bottom: 3px;
-}
-
-.chrome-browser h1 {
-    font-size: 1.1em;
-    margin-bottom: 2px;
-}
-
-.chrome-browser .date {
-    font-size: 0.75em;
-}
-
-.chrome-browser .game-info {
-    padding: 4px;
-    margin-bottom: 4px;
-    gap: 10px;
-}
-
-.chrome-browser .timer,
-.chrome-browser .lives {
-    font-size: 0.85em;
-    gap: 3px;
-}
-
-.chrome-browser #timer,
-.chrome-browser #lives {
-    font-size: 0.95em;
-}
-
-.chrome-browser .progress-container {
-    height: 14px;
-    margin-bottom: 4px;
-}
-
-.chrome-browser .progress-text {
-    font-size: 0.75em;
-}
-
-.chrome-browser .sudoku-grid {
-    margin-bottom: 4px;
-    max-width: 450px;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    border: 2px solid #333;
-}
-
-.chrome-browser .cell {
-    font-size: 1.15em;
-    border: 0.5px solid #ddd;
-}
-
-.chrome-browser .cell:nth-child(3n):not(:nth-child(9n)) {
-    border-right: 2px solid #333;
-}
-
-.chrome-browser .cell:nth-child(n+19):nth-child(-n+27),
-.chrome-browser .cell:nth-child(n+46):nth-child(-n+54) {
-    border-bottom: 2px solid #333;
-}
-
-.chrome-browser .number-pad {
-    gap: 3px;
-    margin: 4px auto;
-    max-width: 450px;
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-}
-
-.chrome-browser .number-btn,
-.chrome-browser .erase-btn {
-    padding: 6px;
-    font-size: 0.95em;
-    border: 1px solid #667eea;
-    width: 100%;
-}
-
-.chrome-browser .controls {
-    gap: 3px;
-    margin-bottom: 4px;
-    max-width: 450px;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-}
-
-.chrome-browser .btn {
-    padding: 6px;
-    font-size: 0.8em;
-}
-
-.chrome-browser .message {
-    padding: 5px;
-    font-size: 0.8em;
-    min-height: 24px;
-    margin-bottom: 4px;
-}
-
-.chrome-browser #btn-leaderboard {
-    padding: 7px 10px;
-    font-size: 0.85em;
-}
-
-/* Fix pour Edge et Firefox - ADAPTATIF COMPLET SANS SCROLL */
-.edge-firefox-browser body {
-    padding: 0;
-    overflow: hidden;
-}
-
-.edge-firefox-browser .container {
-    padding: 2px;
-    max-height: 100vh;
-    height: 100vh;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.edge-firefox-browser header {
-    margin-bottom: 1px;
-    flex-shrink: 0;
-}
-
-.edge-firefox-browser h1 {
-    font-size: 0.85em;
-    margin-bottom: 0;
-    line-height: 1;
-}
-
-.edge-firefox-browser .date {
-    font-size: 0.6em;
-    margin-bottom: 1px;
-    line-height: 1;
-}
-
-.edge-firefox-browser #view-leaderboard-btn {
-    padding: 2px 4px;
-    font-size: 0.6em;
-    margin-top: 1px;
-    min-height: auto;
-    line-height: 1.2;
-}
-
-.edge-firefox-browser .game-info {
-    padding: 1px;
-    margin-bottom: 1px;
-    gap: 4px;
-    flex-shrink: 0;
-}
-
-.edge-firefox-browser .timer,
-.edge-firefox-browser .lives {
-    font-size: 0.7em;
-    gap: 2px;
-}
-
-.edge-firefox-browser .timer-label,
-.edge-firefox-browser .lives-label {
-    font-size: 0.9em;
-}
-
-.edge-firefox-browser #timer,
-.edge-firefox-browser #lives {
-    font-size: 0.8em;
-}
-
-.edge-firefox-browser .progress-container {
-    display: none;
-}
-
-.edge-firefox-browser .sudoku-grid {
-    margin-bottom: 1px;
-    border: 1px solid #333;
-    width: 100%;
-    height: auto;
-    max-height: calc(100vh - 280px);
-    aspect-ratio: 1;
-    flex-shrink: 1;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.edge-firefox-browser .cell {
-    font-size: 0.95em;
-    border: 0.5px solid #ddd;
-}
-
-.edge-firefox-browser .number-pad {
-    gap: 1px;
-    margin: 1px 0;
-    flex-shrink: 0;
-}
-
-.edge-firefox-browser .number-btn,
-.edge-firefox-browser .erase-btn {
-    padding: 3px;
-    font-size: 0.75em;
-    min-height: 24px;
-    line-height: 1;
-}
-
-.edge-firefox-browser .controls {
-    gap: 1px;
-    margin-bottom: 1px;
-    flex-shrink: 0;
-}
-
-.edge-firefox-browser .btn {
-    padding: 3px;
-    font-size: 0.65em;
-    min-height: 22px;
-    line-height: 1.2;
-}
-
-.edge-firefox-browser .message {
-    padding: 1px;
-    font-size: 0.6em;
-    min-height: 14px;
-    margin-bottom: 0;
-    flex-shrink: 0;
-    line-height: 1.2;
-}
-
-header {
-    text-align: center;
-    margin-bottom: 2px;
-}
-
-h1 {
-    color: #667eea;
-    font-size: 1.5em;
-    margin-bottom: 1px;
-    text-shadow: 0 2px 4px rgba(102, 126, 234, 0.15);
-}
-
-.date {
-    color: #666;
-    font-size: 0.85em;
-    font-weight: 500;
-}
-
-/* Sélecteur de difficulté */
-.difficulty-selector {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    padding: 4px;
-}
-
-.difficulty-btn {
-    flex: 1;
-    max-width: 120px;
-    padding: 6px 16px;
-    font-size: 0.85em;
-    font-weight: 600;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    background: white;
-    color: #666;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.difficulty-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.difficulty-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-color: #667eea;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.difficulty-btn.completed {
-    background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
-    color: white;
-    border-color: #66bb6a;
-}
-
-.difficulty-btn.completed:not(.active) {
-    opacity: 0.7;
-}
-
-.game-info {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 3px;
-    padding: 6px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 10px;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.timer, .lives {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 1.1em;
-}
-
-.timer-label, .lives-label {
-    color: #666;
-}
-
-#timer, #lives {
-    color: #667eea;
-    font-weight: bold;
-    font-size: 1.2em;
-    transition: all 0.3s ease;
-}
-
-#lives {
-    color: #ef5350;
-}
-
-#timer.penalty-flash {
-    animation: penaltyFlash 1s ease;
-}
-
-@keyframes penaltyFlash {
-    0%, 100% { 
-        color: #667eea;
-        transform: scale(1);
-    }
-    15%, 45%, 75% { 
-        color: #e53935;
-        transform: scale(1.1);
-    }
-    30%, 60%, 90% { 
-        color: #667eea;
-        transform: scale(1);
-    }
-}
-
-.progress-container {
-    position: relative;
-    width: 100%;
-    height: 30px;
-    background: #f0f0f0;
-    border-radius: 15px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-.progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    transition: width 0.3s ease;
-    width: 0%;
-}
-
-.progress-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-weight: bold;
-    color: #333;
-    font-size: 0.9em;
-}
-
-.sudoku-grid {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    gap: 0;
-    width: 100%;
-    aspect-ratio: 1;
-    border: 3px solid #333;
-    margin-bottom: 6px;
-    background: #333;
-    border-radius: 6px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    flex-shrink: 0;
-    box-sizing: border-box;
-}
-
-.cell {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3em;
-    font-weight: bold;
-    background: white;
-    border: 1px solid #ddd;
-    cursor: pointer;
-}
-
-.cell:hover:not(.fixed) {
-    background: #e3f2fd;
-    transform: scale(1.02);
-}
-
-.cell.selected {
-    background: #bbdefb !important;
-    border: 2px solid #667eea;
-    box-shadow: inset 0 0 8px rgba(102, 126, 234, 0.3);
-}
-
-.cell.fixed {
-    background: linear-gradient(135deg, #f9f9f9 0%, #f0f0f0 100%);
-    color: #333;
-    cursor: pointer;
-    font-weight: 800;
-}
-
-.cell.user-input {
-    color: #667eea;
-}
-
-.cell.correct {
-    background: #e8f5e9 !important;
-    color: #2e7d32;
-}
-
-.cell.same-region {
-    background: rgba(245, 250, 255, 0.75) !important;
-}
-
-.cell.same-number {
-    background: rgba(173, 216, 230, 0.8) !important;
-}
-
-.cell.error {
-    background: #ffcdd2 !important;
-    color: #c62828 !important;
-    animation: shake 0.5s;
-}
-
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-    20%, 40%, 60%, 80% { transform: translateX(5px); }
-}
-
-.cell.notes-active {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    padding: 2px;
-    gap: 1px;
-    font-size: 1em;
-}
-
-.note-number {
-    font-size: 10px;
-    color: #555;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.note-number.same-number-note {
-    background: rgba(173, 216, 230, 0.8);
-    border-radius: 3px;
-    font-weight: 700;
-    color: #1565c0;
-}
-
-/* Bordures épaisses pour les blocs 3x3 */
-.cell:nth-child(3n):not(:nth-child(9n)) {
-    border-right: 3px solid #333;
-}
-
-.cell:nth-child(n+19):nth-child(-n+27),
-.cell:nth-child(n+46):nth-child(-n+54) {
-    border-bottom: 3px solid #333;
-}
-
-/* Clavier numérique */
-.number-pad {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    margin: 8px 0;
-}
-
-.number-btn, .erase-btn {
-    padding: 10px;
-    font-size: 1.2em;
-    font-weight: bold;
-    border: 2px solid #667eea;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-    color: #667eea;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.15);
-}
-
-.number-btn:hover, .erase-btn:hover {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-}
-
-.number-btn:active, .erase-btn:active {
-    transform: translateY(0);
-}
-
-.number-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    background: #e0e0e0;
-    color: #9e9e9e;
-    border-color: #bdbdbd;
-}
-
-.number-btn:disabled:hover {
-    transform: none;
-    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.15);
-}
-
-.erase-btn {
-    background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
-    border-color: #ef5350;
-    color: white;
-    box-shadow: 0 2px 6px rgba(229, 57, 53, 0.25);
-}
-
-.erase-btn:hover {
-    background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
-    border-color: #c62828;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(198, 40, 40, 0.4);
-}
-
-.controls {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.btn {
-    flex: 1;
-    padding: 9px;
-    font-size: 0.95em;
-    font-weight: bold;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #5a67d8 100%);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #5a67d8 0%, #4c51bf 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.btn-secondary {
-    background: #9e9e9e;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #757575;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(158, 158, 158, 0.4);
-}
-
-.btn-secondary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.btn-warning {
-    background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
-    color: white;
-}
-
-.btn-warning:hover {
-    background: linear-gradient(135deg, #fb8c00 0%, #f57c00 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(251, 140, 0, 0.3);
-}
-
-.btn-success {
-    background: #66bb6a;
-    color: white;
-}
-
-.btn-success:hover {
-    background: #4caf50;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 187, 106, 0.4);
-}
-
-.btn-notes {
-    background: #ab47bc;
-    color: white;
-}
-
-.btn-notes:hover {
-    background: #8e24aa;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(171, 71, 188, 0.4);
-}
-
-.btn-notes.active {
-    background: #8e24aa;
-    box-shadow: 0 0 15px rgba(171, 71, 188, 0.6);
-}
-
-.btn-theme {
-    background: #607d8b;
-    color: white;
-}
-
-.btn-theme:hover {
-    background: #455a64;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(96, 125, 139, 0.4);
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #667eea 0%, #5a67d8 100%);
-    color: white;
-}
-
-.btn-danger:hover {
-    background: linear-gradient(135deg, #5a67d8 0%, #4c51bf 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.btn-danger:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.message {
-    text-align: center;
-    padding: 8px;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 0.95em;
-    min-height: 35px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 6px;
-}
-
-.message.success {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-
-.message.error {
-    background: #ffebee;
-    color: #c62828;
-}
-
-.message.info {
-    background: #e3f2fd;
-    color: #1565c0;
-}
-
-@keyframes celebrate {
-    0%, 100% { transform: scale(1) rotate(0deg); }
-    25% { transform: scale(1.05) rotate(2deg); }
-    75% { transform: scale(1.05) rotate(-2deg); }
-}
-
-@keyframes confetti {
-    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-}
-
-.confetti {
-    position: fixed;
-    width: 10px;
-    height: 10px;
-    background: #667eea;
-    animation: confetti 3s linear;
-    pointer-events: none;
-}
-
-/* Grille en mode notes - bordure violette visible */
-.sudoku-grid.notes-mode {
-    border-color: #ab47bc !important;
-    border-width: 6px !important;
-    box-shadow: 0 0 60px rgba(171, 71, 188, 0.9) !important;
-    transition: all 0.3s ease;
-}
-
-.sudoku-grid.notes-mode .cell:hover:not(.fixed) {
-    background: #f3e5f5 !important;
-    box-shadow: inset 0 0 20px rgba(171, 71, 188, 0.3);
-}
-
-.sudoku-grid.notes-mode .cell.selected {
-    background: #e1bee7 !important;
-    border-color: #ab47bc;
-    box-shadow: 0 0 15px rgba(171, 71, 188, 0.8);
-}
-
-body.dark-mode .sudoku-grid.notes-mode {
-    border-color: #ba68c8 !important;
-    box-shadow: 0 0 60px rgba(186, 104, 200, 0.9) !important;
-}
-
-body.dark-mode .sudoku-grid.notes-mode .cell:hover:not(.fixed) {
-    background: #4a148c !important;
-}
-
-body.dark-mode .sudoku-grid.notes-mode .cell.selected {
-    background: #6a1b9a !important;
-}
-
-@media (max-width: 600px) {
-    .container {
-        padding: 10px;
-    }
-
-    h1 {
-        font-size: 1.5em;
+// Variables globales
+let currentGrid = [];
+let solutionGrid = [];
+let notesGrid = [];
+let selectedCell = null;
+let timerInterval = null;
+let startTime = null;
+let hintsUsed = 0;
+let errorsCount = 0;
+let notesMode = false;
+let history = [];
+let historyIndex = -1;
+let gameCompleted = false;
+let originalGrid = [];
+let finalTime = 0;
+let database = null;
+let livesRemaining = 3;
+let currentDifficulty = 'simple'; // 'simple' ou 'difficile'
+
+// Configuration des niveaux de difficulté
+const DIFFICULTY_LEVELS = {
+    simple: { cellsToRemove: 43, label: 'Simple' },
+    difficile: { cellsToRemove: 54, label: 'Difficile' }
+};
+
+// Détection navigateur
+const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
+const isEdge = /Edg/.test(navigator.userAgent);
+const isFirefox = /Firefox/.test(navigator.userAgent);
+
+if (isChrome) {
+    document.body.classList.add('chrome-browser');
+}
+if (isEdge || isFirefox) {
+    document.body.classList.add('edge-firefox-browser');
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', () => {
+    displayCurrentDate();
+    initializeFirebase();
+    
+    // Initialiser les modals (s'assurer qu'ils sont cachés)
+    document.getElementById('name-modal').style.display = 'none';
+    document.getElementById('leaderboard-modal').style.display = 'none';
+    document.getElementById('gameover-modal').style.display = 'none';
+    document.getElementById('seeYouTomorrow-modal').style.display = 'none';
+    
+    // Charger le niveau sauvegardé ou démarrer en simple
+    const savedDifficulty = localStorage.getItem('current-difficulty');
+    if (savedDifficulty && (savedDifficulty === 'simple' || savedDifficulty === 'difficile')) {
+        currentDifficulty = savedDifficulty;
     }
     
-    .game-info {
-        flex-direction: row;
-        gap: 15px;
-        justify-content: space-evenly;
+    updateDifficultyButtons();
+    
+    // Vérifier si les deux niveaux sont terminés
+    if (areBothLevelsCompleted()) {
+        blockAllPuzzles();
+    } else if (isTodayPuzzleCompleted(currentDifficulty)) {
+        blockCurrentPuzzle();
+    } else {
+        initializeGame();
     }
     
-    .timer, .lives {
-        justify-content: center !important;
-        font-size: 1em;
-    }
+    setupEventListeners();
+});
 
-    .cell {
-        font-size: 1em;
-    }
+// Afficher la date actuelle
+function displayCurrentDate() {
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateStr = now.toLocaleDateString('fr-FR', options);
+    document.getElementById('current-date').textContent = dateStr;
+}
 
-    .controls {
-        flex-direction: column;
-        gap: 5px;
+// Initialiser Firebase
+function initializeFirebase() {
+    try {
+        // La configuration sera chargée depuis firebase-config.js
+        if (typeof initFirebase === 'function') {
+            database = initFirebase();
+            if (database) {
+                console.log('Firebase initialisé avec succès');
+            } else {
+                console.log('Firebase non configuré - Mode hors ligne');
+            }
+        }
+    } catch (error) {
+        console.warn('Firebase non disponible:', error);
+        database = null;
+    }
+}
+
+// Générateur de nombre pseudo-aléatoire basé sur une seed (la date)
+function seededRandom(seed) {
+    let x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+}
+
+// Obtenir la seed du jour
+function getTodaysSeed() {
+    const today = new Date();
+    const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+    return seed;
+}
+
+// Obtenir la clé du jour pour localStorage
+function getTodayKey() {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+}
+
+// Vérifier si le puzzle du jour est déjà terminé pour un niveau spécifique
+function isTodayPuzzleCompleted(difficulty = currentDifficulty) {
+    const todayKey = getTodayKey();
+    const completedDate = localStorage.getItem(`sudoku-completed-${difficulty}-${todayKey}`);
+    return completedDate === 'true';
+}
+
+// Marquer le puzzle du jour comme terminé pour un niveau spécifique
+function markTodayPuzzleCompleted(difficulty = currentDifficulty) {
+    const todayKey = getTodayKey();
+    localStorage.setItem(`sudoku-completed-${difficulty}-${todayKey}`, 'true');
+}
+
+// Vérifier si les deux niveaux sont terminés
+function areBothLevelsCompleted() {
+    return isTodayPuzzleCompleted('simple') && isTodayPuzzleCompleted('difficile');
+}
+
+// Bloquer tous les puzzles si les deux niveaux sont terminés
+function blockAllPuzzles() {
+    const messageEl = document.getElementById('message');
+    messageEl.innerHTML = '🎉 <strong>Bravo ! Vous avez terminé les deux niveaux aujourd’hui !</strong><br>Revenez demain pour de nouveaux défis ! 🚀';
+    messageEl.className = 'message success';
+    messageEl.style.display = 'block';
+    
+    // Masquer tous les contrôles de jeu
+    document.querySelector('.sudoku-grid').style.display = 'none';
+    document.querySelector('.number-pad').style.display = 'none';
+    document.querySelectorAll('.controls').forEach(el => el.style.display = 'none');
+    document.querySelector('.difficulty-selector').style.display = 'none';
+}
+
+// Bloquer le niveau actuel mais permettre de changer de niveau
+function blockCurrentPuzzle() {
+    const messageEl = document.getElementById('message');
+    const levelName = DIFFICULTY_LEVELS[currentDifficulty].label;
+    messageEl.innerHTML = `🎉 <strong>Vous avez déjà terminé le niveau ${levelName} aujourd’hui !</strong><br>Essayez l'autre niveau ! 👆`;
+    messageEl.className = 'message success';
+    messageEl.style.display = 'block';
+    
+    // Masquer les contrôles de jeu mais garder le sélecteur de niveau
+    document.querySelector('.sudoku-grid').style.display = 'none';
+    document.querySelector('.number-pad').style.display = 'none';
+    document.querySelectorAll('.controls').forEach(el => el.style.display = 'none');
+}
+
+// Bloquer le jeu si déjà terminé (ancienne fonction, maintenant redirigée)
+function blockCompletedPuzzle() {
+    if (areBothLevelsCompleted()) {
+        blockAllPuzzles();
+    } else {
+        blockCurrentPuzzle();
+    }
+}
+
+// Générer un sudoku complet valide
+function generateCompleteSudoku(seed) {
+    const grid = Array(9).fill(null).map(() => Array(9).fill(0));
+    
+    function isValid(grid, row, col, num) {
+        // Vérifier la ligne
+        for (let x = 0; x < 9; x++) {
+            if (grid[row][x] === num) return false;
+        }
+        
+        // Vérifier la colonne
+        for (let x = 0; x < 9; x++) {
+            if (grid[x][col] === num) return false;
+        }
+        
+        // Vérifier le bloc 3x3
+        let startRow = row - row % 3;
+        let startCol = col - col % 3;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (grid[i + startRow][j + startCol] === num) return false;
+            }
+        }
+        
+        return true;
     }
     
-    .number-pad {
-        gap: 4px;
-        margin: 8px 0;
+    function fillGrid(grid, seed) {
+        let randIndex = 0;
+        
+        for (let row = 0; row < 9; row++) {
+            for (let col = 0; col < 9; col++) {
+                if (grid[row][col] === 0) {
+                    let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                    
+                    for (let i = numbers.length - 1; i > 0; i--) {
+                        const j = Math.floor(seededRandom(seed + randIndex++) * (i + 1));
+                        [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+                    }
+                    
+                    for (let num of numbers) {
+                        if (isValid(grid, row, col, num)) {
+                            grid[row][col] = num;
+                            
+                            if (fillGrid(grid, seed)) {
+                                return true;
+                            }
+                            
+                            grid[row][col] = 0;
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     
-    .number-btn, .erase-btn {
-        padding: 8px;
-        font-size: 1em;
+    fillGrid(grid, seed);
+    return grid;
+}
+
+// Compter le nombre de solutions d'un puzzle (max 2 pour optimiser)
+function countSolutions(grid) {
+    let count = 0;
+    
+    function isValid(grid, row, col, num) {
+        // Vérifier la ligne
+        for (let x = 0; x < 9; x++) {
+            if (grid[row][x] === num) return false;
+        }
+        
+        // Vérifier la colonne
+        for (let x = 0; x < 9; x++) {
+            if (grid[x][col] === num) return false;
+        }
+        
+        // Vérifier le bloc 3x3
+        let startRow = row - row % 3;
+        let startCol = col - col % 3;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (grid[i + startRow][j + startCol] === num) return false;
+            }
+        }
+        return true;
+    }
+    
+    function solve(grid) {
+        if (count > 1) return; // Optimisation : arrêter si plus d'une solution trouvée
+        
+        for (let row = 0; row < 9; row++) {
+            for (let col = 0; col < 9; col++) {
+                if (grid[row][col] === 0) {
+                    for (let num = 1; num <= 9; num++) {
+                        if (isValid(grid, row, col, num)) {
+                            grid[row][col] = num;
+                            solve(grid);
+                            grid[row][col] = 0;
+                        }
+                    }
+                    return;
+                }
+            }
+        }
+        count++;
+    }
+    
+    const gridCopy = grid.map(row => [...row]);
+    solve(gridCopy);
+    return count;
+}
+
+// Créer une grille de jeu en enlevant des cases
+function createPuzzle(completeGrid, seed, difficulty = 40) {
+    const puzzle = completeGrid.map(row => [...row]);
+    let cellsToRemove = difficulty;
+    let attempts = 0;
+    const maxAttempts = 500;
+    
+    while (cellsToRemove > 0 && attempts < maxAttempts) {
+        const row = Math.floor(seededRandom(seed + attempts) * 9);
+        const col = Math.floor(seededRandom(seed + attempts + 1000) * 9);
+        
+        if (puzzle[row][col] !== 0) {
+            const backup = puzzle[row][col];
+            puzzle[row][col] = 0;
+            
+            // Vérifier qu'il n'y a qu'une solution unique
+            if (countSolutions(puzzle) === 1) {
+                cellsToRemove--;
+            } else {
+                // Remettre la valeur si plusieurs solutions
+                puzzle[row][col] = backup;
+            }
+        }
+        attempts++;
+    }
+    
+    return puzzle;
+}
+
+// Initialiser le jeu
+function initializeGame() {
+    const seed = getTodaysSeed();
+    // Utiliser une seed différente pour chaque niveau
+    const levelSeed = seed + (currentDifficulty === 'difficile' ? 10000 : 0);
+    const cellsToRemove = DIFFICULTY_LEVELS[currentDifficulty].cellsToRemove;
+    
+    solutionGrid = generateCompleteSudoku(levelSeed);
+    originalGrid = createPuzzle(solutionGrid, levelSeed, cellsToRemove);
+    currentGrid = originalGrid.map(row => [...row]);
+    notesGrid = Array(9).fill(null).map(() => Array(9).fill(null).map(() => new Set()));
+    history = [];
+    historyIndex = -1;
+    errorsCount = 0;
+    gameCompleted = false;
+    livesRemaining = 3;
+    
+    // Afficher les contrôles de jeu
+    document.querySelector('.sudoku-grid').style.display = 'grid';
+    document.querySelector('.number-pad').style.display = 'grid';
+    document.querySelectorAll('.controls').forEach(el => el.style.display = 'flex');
+    
+    updateLivesDisplay();
+    saveState();
+    renderGrid();
+    updateProgress();
+    updateNumberButtons();
+    startTimer();
+    const levelName = DIFFICULTY_LEVELS[currentDifficulty].label;
+    showMessage(`Niveau ${levelName} - Bonne chance ! 🍀`, 'info');
+}
+
+// Afficher la grille
+function renderGrid() {
+    const gridElement = document.getElementById('sudoku-grid');
+    gridElement.innerHTML = '';
+    
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.dataset.row = row;
+            cell.dataset.col = col;
+            
+            const value = currentGrid[row][col];
+            if (value !== 0) {
+                cell.textContent = value;
+                if (isOriginalCell(row, col)) {
+                    cell.classList.add('fixed');
+                } else {
+                    cell.classList.add('user-input');
+                }
+            } else if (notesGrid[row][col].size > 0) {
+                renderNotes(cell, row, col);
+            }
+            
+            cell.addEventListener('click', () => selectCell(cell));
+            gridElement.appendChild(cell);
+        }
+    }
+    
+    validateRealTime();
+}
+
+// Rendre les notes dans une cellule
+function renderNotes(cell, row, col) {
+    cell.classList.add('notes-active');
+    cell.innerHTML = '';
+    
+    for (let num = 1; num <= 9; num++) {
+        const noteDiv = document.createElement('div');
+        noteDiv.className = 'note-number';
+        if (notesGrid[row][col].has(num)) {
+            noteDiv.textContent = num;
+        }
+        cell.appendChild(noteDiv);
     }
 }
 
-/* Styles pour le bouton du classement */
-.btn-leaderboard {
-    background: #ffa726;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: bold;
-    margin-top: 10px;
-    transition: all 0.3s;
+// Vérifier si c'est une cellule originale
+function isOriginalCell(row, col) {
+    return originalGrid[row][col] !== 0;
 }
 
-.btn-leaderboard:hover {
-    background: #fb8c00;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(255, 167, 38, 0.4);
-}
-
-/* Styles pour les modales */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(5px);
-    animation: fadeIn 0.3s;
-}
-
-.modal.show {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: auto;
-    padding: 30px;
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    width: 90%;
-    max-width: 500px;
-    animation: slideIn 0.3s;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateY(-50px);
-        opacity: 0;
+// Sélectionner une cellule
+function selectCell(cell) {
+    if (selectedCell) {
+        selectedCell.classList.remove('selected');
     }
-    to {
-        transform: translateY(0);
-        opacity: 1;
+    
+    selectedCell = cell;
+    cell.classList.add('selected');
+    
+    highlightRegions();
+    highlightSameNumbers();
+}
+
+// Mettre en évidence la ligne, colonne et bloc de la cellule sélectionnée
+function highlightRegions() {
+    // Retirer toutes les classes de région
+    document.querySelectorAll('.cell').forEach(cell => {
+        cell.classList.remove('same-region');
+    });
+    
+    if (!selectedCell) return;
+    
+    const selectedRow = parseInt(selectedCell.dataset.row);
+    const selectedCol = parseInt(selectedCell.dataset.col);
+    const selectedBlockRow = Math.floor(selectedRow / 3);
+    const selectedBlockCol = Math.floor(selectedCol / 3);
+    
+    // Mettre en évidence toutes les cellules de la même ligne, colonne ou bloc
+    document.querySelectorAll('.cell').forEach(cell => {
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+        const blockRow = Math.floor(row / 3);
+        const blockCol = Math.floor(col / 3);
+        
+        // Ne pas mettre en évidence la cellule sélectionnée elle-même
+        if (row === selectedRow && col === selectedCol) return;
+        
+        // Vérifier si la cellule est dans la même ligne, colonne ou bloc 3x3
+        if (row === selectedRow || col === selectedCol || 
+            (blockRow === selectedBlockRow && blockCol === selectedBlockCol)) {
+            cell.classList.add('same-region');
+        }
+    });
+}
+
+// Mettre en évidence les cases avec le même numéro
+function highlightSameNumbers() {
+    // Retirer toutes les classes same-number et same-number-note
+    document.querySelectorAll('.cell').forEach(cell => {
+        cell.classList.remove('same-number');
+    });
+    document.querySelectorAll('.note-number').forEach(note => {
+        note.classList.remove('same-number-note');
+    });
+    
+    if (!selectedCell) return;
+    
+    const selectedRow = parseInt(selectedCell.dataset.row);
+    const selectedCol = parseInt(selectedCell.dataset.col);
+    const selectedNum = currentGrid[selectedRow][selectedCol];
+    
+    // Si la case sélectionnée est vide, ne rien faire
+    if (selectedNum === 0) return;
+    
+    // Mettre en évidence toutes les cellules avec le même numéro
+    document.querySelectorAll('.cell').forEach(cell => {
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+        const num = currentGrid[row][col];
+        
+        // Ne pas mettre en évidence la cellule sélectionnée elle-même
+        if (row === selectedRow && col === selectedCol) return;
+        
+        if (num === selectedNum) {
+            cell.classList.add('same-number');
+        } else {
+            // Vérifier si la cellule contient des notes avec ce numéro
+            if (notesGrid[row][col].has(selectedNum)) {
+                // Mettre en évidence la note spécifique
+                const noteElements = cell.querySelectorAll('.note-number');
+                noteElements.forEach((noteEl, index) => {
+                    if (index + 1 === selectedNum && noteEl.textContent) {
+                        noteEl.classList.add('same-number-note');
+                    }
+                });
+            }
+        }
+    });
+}
+
+// Effacer les notes dans la ligne, colonne et carré 3x3 quand on place un chiffre
+function removeNotesInRelatedCells(row, col, num) {
+    // Effacer dans la ligne
+    for (let c = 0; c < 9; c++) {
+        if (c !== col) {
+            notesGrid[row][c].delete(num);
+        }
     }
-}
-
-.modal-content h2 {
-    color: #667eea;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.modal-content p {
-    text-align: center;
-    font-size: 1.1em;
-    margin-bottom: 20px;
-    color: #666;
-}
-
-.time-display {
-    text-align: center;
-    font-size: 1.3em;
-    margin: 20px 0;
-    padding: 15px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 10px;
-    color: white;
-}
-
-.final-time {
-    font-weight: bold;
-    font-size: 1.5em;
-    margin-left: 10px;
-}
-
-.name-input-container {
-    margin: 20px 0;
-}
-
-.name-input-container label {
-    display: block;
-    margin-bottom: 10px;
-    color: #333;
-    font-weight: 600;
-}
-
-.name-input-container input {
-    width: 100%;
-    padding: 12px;
-    font-size: 1.1em;
-    border: 2px solid #667eea;
-    border-radius: 8px;
-    box-sizing: border-box;
-    transition: all 0.3s;
-}
-
-.name-input-container input:focus {
-    outline: none;
-    border-color: #764ba2;
-    box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
-}
-
-#submit-score-btn {
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-#skip-score-btn {
-    width: 100%;
-}
-
-/* Styles pour la modale Game Over */
-.gameover-content {
-    max-width: 450px;
-    text-align: center;
-}
-
-.gameover-content h2 {
-    color: #ef5350;
-    font-size: 2.5em;
-    margin-bottom: 15px;
-}
-
-.gameover-content p {
-    font-size: 1.2em;
-    margin-bottom: 10px;
-}
-
-.gameover-message {
-    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-    padding: 25px;
-    border-radius: 12px;
-    margin: 25px 0;
-    border: 2px solid #ef5350;
-}
-
-.gameover-message p {
-    margin: 10px 0;
-    font-size: 1.1em;
-    color: #c62828;
-    font-weight: 600;
-}
-
-#view-solution-btn {
-    width: 100%;
-    margin-top: 10px;
-}
-
-/* Styles pour la modale À demain */
-.seeYouTomorrow-content {
-    max-width: 500px;
-    text-align: center;
-}
-
-.seeYouTomorrow-content h2 {
-    color: #667eea;
-    font-size: 2.5em;
-    margin-bottom: 15px;
-}
-
-.seeYouTomorrow-content > p {
-    font-size: 1.2em;
-    margin-bottom: 10px;
-    color: #666;
-}
-
-.seeYouTomorrow-message {
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-    padding: 25px;
-    border-radius: 12px;
-    margin: 25px 0;
-    border: 2px solid #667eea;
-}
-
-.seeYouTomorrow-message p {
-    margin: 10px 0;
-    font-size: 1.1em;
-    color: #1565c0;
-    font-weight: 600;
-}
-
-#view-final-leaderboard-btn {
-    width: 100%;
-    margin-top: 10px;
-}
-
-.close-btn {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    line-height: 20px;
-}
-
-.close-btn:hover,
-.close-btn:focus {
-    color: #000;
-}
-
-.leaderboard-content {
-    max-width: 700px;
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-.user-rank {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    font-size: 1.3em;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
-.leaderboard-header {
-    display: grid;
-    grid-template-columns: 80px 1fr 120px 120px;
-    gap: 10px;
-    padding: 15px;
-    background: #f5f5f5;
-    border-radius: 8px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-}
-
-/* Onglets du classement */
-.leaderboard-tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    justify-content: center;
-}
-
-.leaderboard-tab {
-    flex: 1;
-    max-width: 200px;
-    padding: 12px 24px;
-    font-size: 1em;
-    font-weight: 600;
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    background: white;
-    color: #666;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.leaderboard-tab:hover {
-    background: #f5f5f5;
-    transform: translateY(-2px);
-}
-
-.leaderboard-tab.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-color: #667eea;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.leaderboard-list {
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.leaderboard-item {
-    display: grid;
-    grid-template-columns: 80px 1fr 120px 120px;
-    gap: 10px;
-    padding: 15px;
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    transition: all 0.3s;
-}
-
-.leaderboard-item:hover {
-    background: #f9f9f9;
-    transform: translateX(5px);
-}
-
-.leaderboard-item.user-entry {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-    border: 2px solid #667eea;
-    font-weight: bold;
-}
-
-.leaderboard-item.top-3 {
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-}
-
-.leaderboard-item.top-3:nth-child(2) {
-    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
-}
-
-.leaderboard-item.top-3:nth-child(3) {
-    background: linear-gradient(135deg, #cd7f32 0%, #e6a86a 100%);
-}
-
-.rank-col, .time-col, .date-col {
-    text-align: center;
-}
-
-.name-col {
-    text-align: left;
-    font-weight: 600;
-}
-
-.medal {
-    font-size: 1.5em;
-    margin-right: 5px;
-}
-
-.loading {
-    text-align: center;
-    padding: 20px;
-    color: #666;
-    font-style: italic;
-}
-
-body.dark-mode .modal-content {
-    background: #0f3460;
-    color: #e4e4e4;
-}
-
-body.dark-mode .modal-content h2 {
-    color: #00d4ff;
-}
-
-body.dark-mode .gameover-content h2 {
-    color: #ef5350;
-}
-
-body.dark-mode .gameover-message {
-    background: linear-gradient(135deg, rgba(211, 47, 47, 0.2) 0%, rgba(229, 57, 53, 0.2) 100%);
-    border-color: #ef5350;
-}
-
-body.dark-mode .gameover-message p {
-    color: #ef5350;
-}
-
-body.dark-mode .seeYouTomorrow-content h2 {
-    color: #00d4ff;
-}
-
-body.dark-mode .seeYouTomorrow-message {
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(102, 126, 234, 0.15) 100%);
-    border-color: #00d4ff;
-}
-
-body.dark-mode .seeYouTomorrow-message p {
-    color: #00d4ff;
-}
-
-body.dark-mode .name-input-container input {
-    background: #1a1a2e;
-    color: #e4e4e4;
-    border-color: #00d4ff;
-}
-
-body.dark-mode .leaderboard-header {
-    background: #16213e;
-    color: #e4e4e4;
-}
-
-body.dark-mode .leaderboard-item {
-    background: #1a1a2e;
-    border-color: #2d4059;
-    color: #e4e4e4;
-}
-
-body.dark-mode .leaderboard-item:hover {
-    background: #16213e;
-}
-
-@media (max-width: 600px) {
-    .leaderboard-header,
-    .leaderboard-item {
-        grid-template-columns: 60px 1fr 90px;
-        font-size: 0.9em;
+    
+    // Effacer dans la colonne
+    for (let r = 0; r < 9; r++) {
+        if (r !== row) {
+            notesGrid[r][col].delete(num);
+        }
     }
-
-    .date-col {
-        display: none;
+    
+    // Effacer dans le carré 3x3
+    const startRow = Math.floor(row / 3) * 3;
+    const startCol = Math.floor(col / 3) * 3;
+    for (let r = startRow; r < startRow + 3; r++) {
+        for (let c = startCol; c < startCol + 3; c++) {
+            if (r !== row || c !== col) {
+                notesGrid[r][c].delete(num);
+            }
+        }
     }
 }
 
-.leaderboard-item.top-3 {
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+// Mettre à jour visuellement les cellules contenant des notes
+function updateNoteCellsDisplay() {
+    document.querySelectorAll('.cell').forEach(cell => {
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+        
+        // Si la cellule est vide et contient des notes, la mettre à jour
+        if (currentGrid[row][col] === 0 && notesGrid[row][col].size > 0) {
+            renderNotes(cell, row, col);
+        } else if (currentGrid[row][col] === 0 && notesGrid[row][col].size === 0 && cell.classList.contains('notes-active')) {
+            // Si la cellule n'a plus de notes, nettoyer l'affichage
+            cell.classList.remove('notes-active');
+            cell.innerHTML = '';
+        }
+    });
 }
 
-.leaderboard-item.top-3:nth-child(2) {
-    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
-}
-
-.leaderboard-item.top-3:nth-child(3) {
-    background: linear-gradient(135deg, #cd7f32 0%, #e6a86a 100%);
-}
-
-.rank-col, .time-col, .date-col {
-    text-align: center;
-}
-
-.name-col {
-    text-align: left;
-    font-weight: 600;
-}
-
-.medal {
-    font-size: 1.5em;
-    margin-right: 5px;
-}
-
-.loading {
-    text-align: center;
-    padding: 20px;
-    color: #666;
-    font-style: italic;
-}
-
-body.dark-mode .modal-content {
-    background: #0f3460;
-    color: #e4e4e4;
-}
-
-body.dark-mode .modal-content h2 {
-    color: #00d4ff;
-}
-
-body.dark-mode .gameover-content h2 {
-    color: #ef5350;
-}
-
-body.dark-mode .gameover-message {
-    background: linear-gradient(135deg, rgba(211, 47, 47, 0.2) 0%, rgba(229, 57, 53, 0.2) 100%);
-    border-color: #ef5350;
-}
-
-body.dark-mode .gameover-message p {
-    color: #ef5350;
-}
-
-body.dark-mode .seeYouTomorrow-content h2 {
-    color: #00d4ff;
-}
-
-body.dark-mode .seeYouTomorrow-message {
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(102, 126, 234, 0.15) 100%);
-    border-color: #00d4ff;
-}
-
-body.dark-mode .seeYouTomorrow-message p {
-    color: #00d4ff;
-}
-
-body.dark-mode .name-input-container input {
-    background: #1a1a2e;
-    color: #e4e4e4;
-    border-color: #00d4ff;
-}
-
-body.dark-mode .leaderboard-header {
-    background: #16213e;
-    color: #e4e4e4;
-}
-
-body.dark-mode .leaderboard-item {
-    background: #1a1a2e;
-    border-color: #2d4059;
-    color: #e4e4e4;
-}
-
-body.dark-mode .leaderboard-item:hover {
-    background: #16213e;
-}
-
-@media (max-width: 600px) {
-    .leaderboard-header,
-    .leaderboard-item {
-        grid-template-columns: 60px 1fr 90px;
-        font-size: 0.9em;
+// Changer le niveau de difficulté
+function changeDifficulty(newDifficulty) {
+    if (newDifficulty === currentDifficulty) return;
+    
+    // Sauvegarder le choix
+    currentDifficulty = newDifficulty;
+    localStorage.setItem('current-difficulty', currentDifficulty);
+    
+    // Arrêter le timer actuel
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
     }
-
-    .date-col {
-        display: none;
+    
+    // Mettre à jour les boutons
+    updateDifficultyButtons();
+    
+    // Vérifier si ce niveau est déjà terminé
+    if (isTodayPuzzleCompleted(currentDifficulty)) {
+        blockCurrentPuzzle();
+    } else {
+        // Réinitialiser et démarrer le nouveau niveau
+        document.getElementById('message').style.display = 'none';
+        initializeGame();
     }
 }
 
-body.dark-mode .gameover-message p {
-    color: #ef5350;
-}
-
-body.dark-mode .seeYouTomorrow-content h2 {
-    color: #00d4ff;
-}
-
-body.dark-mode .seeYouTomorrow-message {
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(102, 126, 234, 0.15) 100%);
-    border-color: #00d4ff;
-}
-
-body.dark-mode .seeYouTomorrow-message p {
-    color: #00d4ff;
-}
-
-body.dark-mode .name-input-container input {
-    background: #1a1a2e;
-    color: #e4e4e4;
-    border-color: #00d4ff;
-}
-
-body.dark-mode .leaderboard-header {
-    background: #16213e;
-    color: #e4e4e4;
-}
-
-body.dark-mode .leaderboard-item {
-    background: #1a1a2e;
-    border-color: #2d4059;
-    color: #e4e4e4;
-}
-
-body.dark-mode .leaderboard-item:hover {
-    background: #16213e;
-}
-
-@media (max-width: 600px) {
-    .leaderboard-header,
-    .leaderboard-item {
-        grid-template-columns: 60px 1fr 90px;
-        font-size: 0.9em;
+// Mettre à jour l'apparence des boutons de difficulté
+function updateDifficultyButtons() {
+    const simpleBtn = document.getElementById('difficulty-simple');
+    const difficileBtn = document.getElementById('difficulty-difficile');
+    
+    if (!simpleBtn || !difficileBtn) return;
+    
+    // Retirer la classe active des deux
+    simpleBtn.classList.remove('active');
+    difficileBtn.classList.remove('active');
+    
+    // Ajouter la classe active au bouton actuel
+    if (currentDifficulty === 'simple') {
+        simpleBtn.classList.add('active');
+    } else {
+        difficileBtn.classList.add('active');
     }
-
-    .date-col {
-        display: none;
+    
+    // Désactiver les boutons des niveaux déjà terminés
+    if (isTodayPuzzleCompleted('simple')) {
+        simpleBtn.classList.add('completed');
+        simpleBtn.innerHTML = '✓ Simple';
+    } else {
+        simpleBtn.classList.remove('completed');
+        simpleBtn.innerHTML = 'Simple';
     }
+    
+    if (isTodayPuzzleCompleted('difficile')) {
+        difficileBtn.classList.add('completed');
+        difficileBtn.innerHTML = '✓ Difficile';
+    } else {
+        difficileBtn.classList.remove('completed');
+        difficileBtn.innerHTML = 'Difficile';
+    }
+}
+
+// Configurer les écouteurs d'événements
+function setupEventListeners() {
+    // Boutons de changement de difficulté
+    document.getElementById('difficulty-simple')?.addEventListener('click', () => changeDifficulty('simple'));
+    document.getElementById('difficulty-difficile')?.addEventListener('click', () => changeDifficulty('difficile'));
+    
+    document.addEventListener('keydown', (e) => {
+        if (!selectedCell) return;
+        
+        const key = e.key;
+        
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+            e.preventDefault();
+            navigateCell(key);
+            return;
+        }
+        
+        if (key === ' ') {
+            e.preventDefault();
+            toggleNotesMode();
+            return;
+        }
+        
+        if (key >= '1' && key <= '9') {
+            placeNumber(parseInt(key));
+        } else if (key === 'Backspace' || key === 'Delete' || key === '0') {
+            placeNumber(0);
+        }
+    });
+    
+    document.getElementById('hint-btn').addEventListener('click', giveHint);
+    document.getElementById('reset-btn').addEventListener('click', resetGame);
+    document.getElementById('notes-btn').addEventListener('click', toggleNotesMode);
+    document.getElementById('undo-btn').addEventListener('click', undo);
+    document.getElementById('redo-btn').addEventListener('click', redo);
+    // document.getElementById('theme-btn').addEventListener('click', toggleTheme);
+    document.getElementById('share-btn').addEventListener('click', shareScore);
+    
+    // Événements pour le clavier numérique
+    document.querySelectorAll('.number-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const num = parseInt(btn.dataset.number);
+            placeNumber(num);
+        });
+    });
+    
+    document.querySelector('.erase-btn').addEventListener('click', () => {
+        placeNumber(0);
+    });
+    
+    // Événements pour les modales
+    document.getElementById('view-leaderboard-btn').addEventListener('click', showLeaderboard);
+    document.getElementById('submit-score-btn').addEventListener('click', submitScore);
+    document.getElementById('skip-score-btn').addEventListener('click', closeNameModal);
+    document.getElementById('close-leaderboard').addEventListener('click', closeLeaderboard);
+    document.getElementById('view-solution-btn').addEventListener('click', showSolution);
+    document.getElementById('view-final-leaderboard-btn').addEventListener('click', () => {
+        closeSeeYouTomorrowModal();
+        showLeaderboard();
+    });
+    
+    // Fermer les modales en cliquant à l'extérieur
+    window.addEventListener('click', (e) => {
+        const nameModal = document.getElementById('name-modal');
+        const leaderboardModal = document.getElementById('leaderboard-modal');
+        const gameoverModal = document.getElementById('gameover-modal');
+        if (e.target === nameModal) {
+            closeNameModal();
+        }
+        if (e.target === leaderboardModal) {
+            closeLeaderboard();
+        }
+        if (e.target === gameoverModal) {
+            // Ne pas permettre de fermer la modale game over
+        }
+        // Ne pas permettre de fermer la modale "À demain" en cliquant à l'extérieur
+    });
+}
+
+// Placer un nombre dans la cellule sélectionnée
+function placeNumber(num) {
+    if (!selectedCell) return;
+    
+    const row = parseInt(selectedCell.dataset.row);
+    const col = parseInt(selectedCell.dataset.col);
+    
+    if (isOriginalCell(row, col)) return;
+    if (gameCompleted) return;
+    
+    saveState();
+    
+    if (notesMode && num !== 0) {
+        if (notesGrid[row][col].has(num)) {
+            notesGrid[row][col].delete(num);
+        } else {
+            notesGrid[row][col].add(num);
+        }
+        renderNotes(selectedCell, row, col);
+    } else {
+        if (num === 0) {
+            currentGrid[row][col] = 0;
+            notesGrid[row][col].clear();
+            selectedCell.textContent = '';
+            selectedCell.classList.remove('user-input', 'error', 'correct', 'notes-active');
+        } else {
+            // Vérifier si le nombre placé est correct
+            const isCorrect = (num === solutionGrid[row][col]);
+            
+            if (!isCorrect) {
+                // Si incorrect, afficher temporairement le chiffre avec animation d'erreur
+                selectedCell.textContent = num;
+                selectedCell.classList.add('user-input', 'error');
+                
+                livesRemaining--;
+                updateLivesDisplay();
+                
+                // Après l'animation, effacer le chiffre
+                setTimeout(() => {
+                    selectedCell.classList.remove('error', 'user-input');
+                    selectedCell.textContent = '';
+                    currentGrid[row][col] = 0;
+                }, 500);
+                
+                // Vérifier si le joueur a perdu
+                if (livesRemaining <= 0) {
+                    gameOver();
+                    return;
+                }
+            } else {
+                // Si correct, garder le chiffre
+                currentGrid[row][col] = num;
+                notesGrid[row][col].clear();
+                
+                // Effacer automatiquement les notes correspondantes dans les cellules liées
+                removeNotesInRelatedCells(row, col, num);
+                
+                // Re-rendre la grille complète pour afficher tous les changements
+                renderGrid();
+                
+                // Re-sélectionner la cellule après le re-rendu
+                const cells = document.querySelectorAll('.cell');
+                selectedCell = cells[row * 9 + col];
+                if (selectedCell) {
+                    selectedCell.classList.add('selected');
+                }
+            }
+        }
+    }
+    
+    updateProgress();
+    updateNumberButtons();
+    validateRealTime();
+    highlightSameNumbers();
+    checkCompletion();
+}
+
+// Navigation au clavier
+function navigateCell(direction) {
+    if (!selectedCell) return;
+    
+    let row = parseInt(selectedCell.dataset.row);
+    let col = parseInt(selectedCell.dataset.col);
+    
+    switch(direction) {
+        case 'ArrowUp': row = Math.max(0, row - 1); break;
+        case 'ArrowDown': row = Math.min(8, row + 1); break;
+        case 'ArrowLeft': col = Math.max(0, col - 1); break;
+        case 'ArrowRight': col = Math.min(8, col + 1); break;
+    }
+    
+    const newCell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+    if (newCell) selectCell(newCell);
+}
+
+// Basculer le mode notes
+function toggleNotesMode() {
+    notesMode = !notesMode;
+    const btn = document.getElementById('notes-btn');
+    const grid = document.getElementById('sudoku-grid');
+    
+    btn.classList.toggle('active', notesMode);
+    
+    if (notesMode) {
+        grid.classList.add('notes-mode');
+    } else {
+        grid.classList.remove('notes-mode');
+    }
+}
+
+// Validation en temps réel - désactivée pour ne pas donner d'indices
+function validateRealTime() {
+    // Ne fait plus rien - le joueur doit découvrir ses erreurs lui-même
+}
+
+// Vérifier les conflits
+function hasConflict(row, col, num) {
+    for (let c = 0; c < 9; c++) {
+        if (c !== col && currentGrid[row][c] === num) return true;
+    }
+    
+    for (let r = 0; r < 9; r++) {
+        if (r !== row && currentGrid[r][col] === num) return true;
+    }
+    
+    const startRow = Math.floor(row / 3) * 3;
+    const startCol = Math.floor(col / 3) * 3;
+    for (let r = startRow; r < startRow + 3; r++) {
+        for (let c = startCol; c < startCol + 3; c++) {
+            if ((r !== row || c !== col) && currentGrid[r][c] === num) return true;
+        }
+    }
+    
+    return false;
+}
+
+// Mettre en évidence les chiffres identiques
+// Sauvegarder l'état pour undo/redo
+function saveState() {
+    if (historyIndex < history.length - 1) {
+        history = history.slice(0, historyIndex + 1);
+    }
+    
+    history.push({
+        grid: currentGrid.map(row => [...row]),
+        notes: notesGrid.map(row => row.map(set => new Set(set)))
+    });
+    
+    historyIndex++;
+    updateUndoRedoButtons();
+}
+
+// Annuler
+function undo() {
+    if (historyIndex > 0) {
+        historyIndex--;
+        const state = history[historyIndex];
+        currentGrid = state.grid.map(row => [...row]);
+        notesGrid = state.notes.map(row => row.map(set => new Set(set)));
+        renderGrid();
+        updateProgress();
+        updateNumberButtons();
+        updateUndoRedoButtons();
+    }
+}
+
+// Refaire
+function redo() {
+    if (historyIndex < history.length - 1) {
+        historyIndex++;
+        const state = history[historyIndex];
+        currentGrid = state.grid.map(row => [...row]);
+        notesGrid = state.notes.map(row => row.map(set => new Set(set)));
+        renderGrid();
+        updateProgress();
+        updateNumberButtons();
+        updateUndoRedoButtons();
+    }
+}
+
+// Mettre à jour les boutons undo/redo
+function updateUndoRedoButtons() {
+    document.getElementById('undo-btn').disabled = historyIndex <= 0;
+    document.getElementById('redo-btn').disabled = historyIndex >= history.length - 1;
+}
+
+// Mettre à jour la progression
+function updateProgress() {
+    // Barre de progression supprimée
+}
+
+// Fonction toggleTheme désactivée (bouton thème supprimé)
+/*
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    document.getElementById('theme-btn').textContent = isDark ? 'Clair' : 'Sombre';
+}
+*/
+
+// Vérifier la solution
+// Donner un indice
+function giveHint() {
+    const emptyCells = [];
+    
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            if (currentGrid[row][col] === 0) {
+                emptyCells.push({ row, col });
+            }
+        }
+    }
+    
+    if (emptyCells.length === 0) {
+        showMessage('La grille est déjà complète !', 'info');
+        return;
+    }
+    
+    // Bloquer l'indice s'il ne reste qu'une seule case vide
+    if (emptyCells.length === 1) {
+        showMessage('⛔ Impossible d\'utiliser un indice : il ne reste qu\'une case !', 'error');
+        return;
+    }
+    
+    const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    const { row, col } = randomCell;
+    
+    saveState();
+    currentGrid[row][col] = solutionGrid[row][col];
+    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+    cell.textContent = solutionGrid[row][col];
+    cell.classList.add('correct', 'user-input');
+    
+    hintsUsed++;
+    
+    // Ajouter pénalité au chronomètre (1 minute pour difficile, 30 secondes pour simple)
+    const penaltyTime = currentDifficulty === 'difficile' ? 60000 : 30000; // 60s ou 30s en millisecondes
+    const penaltySeconds = currentDifficulty === 'difficile' ? 60 : 30;
+    if (startTime) {
+        startTime -= penaltyTime;
+    }
+    
+    // Animation rouge sur le timer
+    const timerElement = document.getElementById('timer');
+    timerElement.classList.add('penalty-flash');
+    setTimeout(() => {
+        timerElement.classList.remove('penalty-flash');
+    }, 1000);
+    
+    updateProgress();
+    updateNumberButtons();
+    showMessage(`Indice donné ! (+${penaltySeconds}s de pénalité, ${hintsUsed} utilisés)`, 'info');
+}
+
+// Réinitialiser le jeu
+function resetGame() {
+    if (confirm('Êtes-vous sûr de vouloir recommencer ?')) {
+        stopTimer();
+        hintsUsed = 0;
+        document.getElementById('share-btn').style.display = 'none';
+        initializeGame();
+    }
+}
+
+// Chronomètre
+function startTimer() {
+    startTime = Date.now();
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+    const seconds = (elapsed % 60).toString().padStart(2, '0');
+    document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+}
+
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
+// Mettre à jour l'affichage des vies
+function updateLivesDisplay() {
+    const livesElement = document.getElementById('lives');
+    if (livesElement) {
+        livesElement.textContent = livesRemaining;
+        
+        // Changer la couleur en fonction du nombre de vies
+        if (livesRemaining === 3) {
+            livesElement.style.color = '#ef5350';
+        } else if (livesRemaining === 2) {
+            livesElement.style.color = '#ff9800';
+        } else if (livesRemaining === 1) {
+            livesElement.style.color = '#d32f2f';
+        } else {
+            livesElement.style.color = '#b71c1c';
+        }
+    }
+}
+
+// Mettre à jour l'état des boutons de chiffres
+function updateNumberButtons() {
+    // Compter combien de fois chaque chiffre apparaît dans la grille
+    const numberCounts = Array(10).fill(0);
+    
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            const num = currentGrid[row][col];
+            if (num !== 0) {
+                numberCounts[num]++;
+            }
+        }
+    }
+    
+    // Désactiver les boutons si 9 instances sont placées
+    document.querySelectorAll('.number-btn').forEach(btn => {
+        const num = parseInt(btn.dataset.number);
+        if (numberCounts[num] >= 9) {
+            btn.disabled = true;
+        } else {
+            btn.disabled = false;
+        }
+    });
+}
+
+// Vérifier si la grille est complète
+function checkCompletion() {
+    let isComplete = true;
+    let isCorrect = true;
+    
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            if (currentGrid[row][col] === 0) {
+                isComplete = false;
+                break;
+            }
+            if (currentGrid[row][col] !== solutionGrid[row][col]) {
+                isCorrect = false;
+            }
+        }
+        if (!isComplete) break;
+    }
+    
+    // Si la grille est complète et correcte, le joueur a gagné
+    if (isComplete && isCorrect) {
+        gameCompleted = true;
+        stopTimer();
+        finalTime = Math.floor((Date.now() - startTime) / 1000);
+        
+        // Marquer le puzzle comme terminé
+        markTodayPuzzleCompleted();
+        
+        // Désactiver tous les contrôles
+        document.querySelectorAll('.number-btn, .erase-btn').forEach(btn => {
+            btn.disabled = true;
+        });
+        document.getElementById('hint-btn').disabled = true;
+        document.getElementById('undo-btn').disabled = true;
+        document.getElementById('redo-btn').disabled = true;
+        document.getElementById('notes-btn').disabled = true;
+        document.getElementById('reset-btn').disabled = true;
+        
+        celebrateWin();
+        setTimeout(() => {
+            showNameModal();
+        }, 1500);
+    } else if (isComplete && !isCorrect) {
+        // La grille est complète mais incorrecte - Game Over
+        gameOver();
+    }
+}
+
+// Game Over - le joueur a perdu toutes ses vies
+function gameOver() {
+    gameCompleted = true;
+    stopTimer();
+    
+    // Marquer le puzzle comme perdu (impossible de le refaire)
+    markTodayPuzzleCompleted();
+    
+    // Désactiver tous les contrôles
+    document.querySelectorAll('.number-btn, .erase-btn').forEach(btn => {
+        btn.disabled = true;
+    });
+    
+    // Désactiver aussi les autres boutons
+    document.getElementById('hint-btn').disabled = true;
+    document.getElementById('undo-btn').disabled = true;
+    document.getElementById('redo-btn').disabled = true;
+    document.getElementById('notes-btn').disabled = true;
+    document.getElementById('reset-btn').disabled = true;
+    
+    // Afficher la modale Game Over
+    const modal = document.getElementById('gameover-modal');
+    modal.style.display = 'flex';
+    modal.classList.add('show');
+}
+
+// Afficher la solution
+function showSolution() {
+    // Remplir la grille avec la solution
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            if (!isOriginalCell(row, col)) {
+                currentGrid[row][col] = solutionGrid[row][col];
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.textContent = solutionGrid[row][col];
+                    cell.classList.add('user-input');
+                    cell.classList.remove('error');
+                }
+            }
+        }
+    }
+    
+    // Fermer la modale
+    const modal = document.getElementById('gameover-modal');
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+}
+
+// Afficher un message
+function showMessage(text, type) {
+    const messageEl = document.getElementById('message');
+    messageEl.textContent = text;
+    messageEl.className = `message ${type}`;
+    
+    setTimeout(() => {
+        messageEl.className = 'message';
+        messageEl.textContent = '';
+    }, 3000);
+}
+
+// Célébration de victoire
+function celebrateWin() {
+    const grid = document.getElementById('sudoku-grid');
+    grid.style.animation = 'celebrate 1s ease-in-out';
+    
+    for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+            createConfetti();
+        }, i * 50);
+    }
+    
+    setTimeout(() => {
+        grid.style.animation = '';
+    }, 1000);
+}
+
+// Créer un confetti
+function createConfetti() {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = ['#667eea', '#764ba2', '#ffa726', '#66bb6a', '#ef5350'][Math.floor(Math.random() * 5)];
+    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    document.body.appendChild(confetti);
+    
+    setTimeout(() => confetti.remove(), 5000);
+}
+
+// Partager le score
+function shareScore() {
+    const time = document.getElementById('timer').textContent;
+    const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    
+    const text = `🎯 Sudoku du ${today}\n⏱️ Temps: ${time}\n💡 Indices: ${hintsUsed}\n❌ Erreurs: ${errorsCount}\n\n✅ Résolu avec succès !`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Mon score Sudoku',
+            text: text
+        }).catch(() => {
+            copyToClipboard(text);
+        });
+    } else {
+        copyToClipboard(text);
+    }
+}
+
+// Copier dans le presse-papier
+function copyToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    showMessage('📋 Score copié dans le presse-papier !', 'success');
+}
+
+// Afficher le modal de saisie du nom
+function showNameModal() {
+    // S'assurer que le modal de classement est complètement fermé
+    const leaderboardModal = document.getElementById('leaderboard-modal');
+    leaderboardModal.classList.remove('show');
+    leaderboardModal.style.display = 'none';
+    
+    const modal = document.getElementById('name-modal');
+    const finalTimeDisplay = document.getElementById('final-time');
+    const minutes = Math.floor(finalTime / 60).toString().padStart(2, '0');
+    const seconds = (finalTime % 60).toString().padStart(2, '0');
+    finalTimeDisplay.textContent = `${minutes}:${seconds}`;
+    modal.style.display = 'flex';
+    modal.classList.add('show');
+    document.getElementById('player-name').focus();
+}
+
+// Fermer le modal de saisie du nom
+function closeNameModal() {
+    const modal = document.getElementById('name-modal');
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+    document.getElementById('player-name').value = '';
+    
+    // Afficher la modale "À demain"
+    showSeeYouTomorrowModal();
+}
+
+// Soumettre le score
+async function submitScore() {
+    const rawName = document.getElementById('player-name').value;
+    const playerName = sanitizeName(rawName);
+    
+    if (!playerName || playerName.length < 2) {
+        showMessage('Veuillez entrer un nom valide (2-10 caractères) !', 'error');
+        return;
+    }
+    
+    if (!database) {
+        showMessage('⚠️ Configurez Firebase pour activer le classement (voir README.md)', 'info');
+        closeNameModal();
+        return;
+    }
+    
+    try {
+        const today = getTodayKey();
+        const scoreData = {
+            name: playerName,
+            time: finalTime,
+            hints: hintsUsed,
+            errors: errorsCount,
+            difficulty: currentDifficulty,
+            date: new Date().toISOString(),
+            timestamp: Date.now()
+        };
+        
+        // Sauvegarder le score dans Firebase avec le niveau
+        await database.ref(`scores/${today}/${currentDifficulty}`).push(scoreData);
+        
+        closeNameModal();
+        showMessage('🎉 Score enregistré avec succès !', 'success');
+        
+        // Afficher la modale "À demain" au lieu du classement
+        setTimeout(() => {
+            showSeeYouTomorrowModal();
+        }, 400);
+        
+    } catch (error) {
+        console.error('Erreur lors de l\'enregistrement:', error);
+        showMessage('Erreur lors de l\'enregistrement du score', 'error');
+    }
+}
+
+// Afficher le classement
+async function showLeaderboard(selectedDifficulty = currentDifficulty) {
+    // S'assurer que le modal de nom est complètement fermé
+    const nameModal = document.getElementById('name-modal');
+    nameModal.classList.remove('show');
+    nameModal.style.display = 'none';
+    
+    const modal = document.getElementById('leaderboard-modal');
+    const leaderboardList = document.getElementById('leaderboard-list');
+    const userRankDiv = document.getElementById('user-rank');
+    
+    modal.style.display = 'flex';
+    modal.classList.add('show');
+    
+    leaderboardList.innerHTML = '<div class="loading">Chargement du classement...</div>';
+    userRankDiv.innerHTML = '';
+    
+    // Créer les onglets de difficulté
+    const tabsHtml = `
+        <div class="leaderboard-tabs">
+            <button class="leaderboard-tab ${selectedDifficulty === 'simple' ? 'active' : ''}" data-difficulty="simple">
+                📊 Simple
+            </button>
+            <button class="leaderboard-tab ${selectedDifficulty === 'difficile' ? 'active' : ''}" data-difficulty="difficile">
+                🏆 Difficile
+            </button>
+        </div>
+    `;
+    
+    // Insérer les onglets avant la liste (si pas déjà fait)
+    if (!document.querySelector('.leaderboard-tabs')) {
+        leaderboardList.insertAdjacentHTML('beforebegin', tabsHtml);
+        
+        // Ajouter les événements sur les onglets
+        document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const difficulty = tab.dataset.difficulty;
+                showLeaderboard(difficulty);
+            });
+        });
+    } else {
+        // Mettre à jour l'onglet actif
+        document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.difficulty === selectedDifficulty);
+        });
+    }
+    
+    if (!database) {
+        leaderboardList.innerHTML = '<div class="loading">⚠️ Le classement nécessite la configuration de Firebase.<br><br>Consultez le README.md pour les instructions.</div>';
+        return;
+    }
+    
+    try {
+        const today = getTodayKey();
+        const snapshot = await database.ref(`scores/${today}/${selectedDifficulty}`).orderByChild('time').once('value');
+        
+        const scores = [];
+        snapshot.forEach((childSnapshot) => {
+            scores.push({
+                id: childSnapshot.key,
+                ...childSnapshot.val()
+            });
+        });
+        
+        if (scores.length === 0) {
+            const levelName = DIFFICULTY_LEVELS[selectedDifficulty].label;
+            leaderboardList.innerHTML = `<div class="loading">Aucun score enregistré pour le niveau ${levelName} aujourd'hui</div>`;
+            return;
+        }
+        
+        // Trier par temps (déjà trié par Firebase, mais on s'assure)
+        scores.sort((a, b) => a.time - b.time);
+        
+        // Construire le HTML du classement
+        leaderboardList.innerHTML = '';
+        scores.forEach((score, index) => {
+            const item = document.createElement('div');
+            item.className = 'leaderboard-item';
+            
+            if (index < 3) {
+                item.classList.add('top-3');
+            }
+            
+            const rank = index + 1;
+            const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+            const minutes = Math.floor(score.time / 60).toString().padStart(2, '0');
+            const seconds = (score.time % 60).toString().padStart(2, '0');
+            const date = new Date(score.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+            
+            item.innerHTML = `
+                <div class="rank-col">${medal} ${rank}</div>
+                <div class="name-col">${escapeHtml(score.name)}</div>
+                <div class="time-col">${minutes}:${seconds}</div>
+                <div class="date-col">${date}</div>
+            `;
+            
+            leaderboardList.appendChild(item);
+        });
+        
+        // Afficher le rang de l'utilisateur s'il a joué
+        if (gameCompleted && finalTime > 0) {
+            const userPosition = scores.findIndex(s => s.time >= finalTime) + 1;
+            const totalPlayers = scores.length;
+            const percentile = Math.round((1 - (userPosition / totalPlayers)) * 100);
+            
+            userRankDiv.innerHTML = `
+                🎯 Vous êtes le/la ${userPosition}${getOrdinalSuffix(userPosition)} plus rapide !<br>
+                Vous êtes dans le top ${100 - percentile}% des joueurs (${totalPlayers} joueurs aujourd'hui)
+            `;
+        }
+        
+    } catch (error) {
+        console.error('Erreur lors du chargement du classement:', error);
+        leaderboardList.innerHTML = '<div class="loading">Erreur lors du chargement du classement</div>';
+    }
+}
+
+// Fermer le modal du classement
+function closeLeaderboard() {
+    const modal = document.getElementById('leaderboard-modal');
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+}
+
+// Obtenir le suffixe ordinal (er, ème)
+function getOrdinalSuffix(num) {
+    if (num === 1) return 'er';
+    return 'ème';
+}
+
+// Nettoyer et valider le nom du joueur
+function sanitizeName(name) {
+    // Supprimer les espaces au début et à la fin
+    name = name.trim();
+    
+    // Limiter à 10 caractères
+    name = name.substring(0, 10);
+    
+    // Supprimer les caractères dangereux (garde seulement lettres, chiffres, espaces, tirets, apostrophes)
+    name = name.replace(/[^a-zA-Z0-9àâäéèêëïîôùûüÿæœçÀÂÄÉÈÊËÏÎÔÙÛÜŸÆŒÇ\s'-]/g, '');
+    
+    // Supprimer les espaces multiples
+    name = name.replace(/\s+/g, ' ');
+    
+    return name;
+}
+
+// Échapper le HTML pour éviter les injections XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Afficher la modale "À demain"
+function showSeeYouTomorrowModal() {
+    // S'assurer que toutes les autres modales sont fermées
+    const nameModal = document.getElementById('name-modal');
+    nameModal.classList.remove('show');
+    nameModal.style.display = 'none';
+    
+    const leaderboardModal = document.getElementById('leaderboard-modal');
+    leaderboardModal.classList.remove('show');
+    leaderboardModal.style.display = 'none';
+    
+    // Afficher la modale "À demain"
+    const modal = document.getElementById('seeYouTomorrow-modal');
+    modal.style.display = 'flex';
+    modal.classList.add('show');
+}
+
+// Fermer la modale "À demain"
+function closeSeeYouTomorrowModal() {
+    const modal = document.getElementById('seeYouTomorrow-modal');
+    modal.classList.remove('show');
+    modal.style.display = 'none';
 }
