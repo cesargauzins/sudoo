@@ -5,6 +5,7 @@ let notesGrid = [];
 let selectedCell = null;
 let timerInterval = null;
 let startTime = null;
+let elapsedTime = 0;
 let hintsUsed = 0;
 let errorsCount = 0;
 let notesMode = false;
@@ -16,6 +17,7 @@ let finalTime = 0;
 let database = null;
 let livesRemaining = 3;
 let currentDifficulty = 'simple'; // 'simple' ou 'difficile'
+let isPaused = false;
 
 // Configuration des niveaux de difficulté
 const DIFFICULTY_LEVELS = {
@@ -326,7 +328,9 @@ function initializeGame() {
     livesRemaining = 3;
     
     // Afficher les contrôles de jeu
-    document.querySelector('.sudoku-grid').style.display = 'grid';
+    const gridElement = document.querySelector('.sudoku-grid');
+    gridElement.style.display = 'grid';
+    gridElement.classList.remove('paused');
     document.querySelector('.number-pad').style.display = 'grid';
     document.querySelectorAll('.controls').forEach(el => el.style.display = 'flex');
     
@@ -394,6 +398,7 @@ function isOriginalCell(row, col) {
 
 // Sélectionner une cellule
 function selectCell(cell) {
+    if (isPaused) return;
     if (selectedCell) {
         selectedCell.classList.remove('selected');
     }
@@ -620,11 +625,9 @@ function setupEventListeners() {
         }
     });
     
-    document.getElementById('hint-btn').addEventListener('click', giveHint);
     document.getElementById('reset-btn').addEventListener('click', resetGame);
     document.getElementById('notes-btn').addEventListener('click', toggleNotesMode);
-    document.getElementById('undo-btn').addEventListener('click', undo);
-    document.getElementById('redo-btn').addEventListener('click', redo);
+    document.getElementById('pause-btn').addEventListener('click', togglePause);
     // document.getElementById('theme-btn').addEventListener('click', toggleTheme);
     document.getElementById('share-btn').addEventListener('click', shareScore);
     
@@ -672,6 +675,7 @@ function setupEventListeners() {
 // Placer un nombre dans la cellule sélectionnée
 function placeNumber(num) {
     if (!selectedCell) return;
+    if (isPaused) return;
     
     const row = parseInt(selectedCell.dataset.row);
     const col = parseInt(selectedCell.dataset.col);
@@ -749,6 +753,7 @@ function placeNumber(num) {
 // Navigation au clavier
 function navigateCell(direction) {
     if (!selectedCell) return;
+    if (isPaused) return;
     
     let row = parseInt(selectedCell.dataset.row);
     let col = parseInt(selectedCell.dataset.col);
@@ -766,6 +771,7 @@ function navigateCell(direction) {
 
 // Basculer le mode notes
 function toggleNotesMode() {
+    if (isPaused) return;
     notesMode = !notesMode;
     const btn = document.getElementById('notes-btn');
     const grid = document.getElementById('sudoku-grid');
@@ -776,6 +782,29 @@ function toggleNotesMode() {
         grid.classList.add('notes-mode');
     } else {
         grid.classList.remove('notes-mode');
+    }
+}
+
+// Basculer la pause
+function togglePause() {
+    if (gameCompleted) return;
+    
+    isPaused = !isPaused;
+    const btn = document.getElementById('pause-btn');
+    const grid = document.getElementById('sudoku-grid');
+    
+    if (isPaused) {
+        // Mettre en pause
+        stopTimer();
+        grid.classList.add('paused');
+        btn.innerHTML = '▶️ Reprendre';
+        btn.classList.add('active');
+    } else {
+        // Reprendre
+        startTimer();
+        grid.classList.remove('paused');
+        btn.innerHTML = '⏸️ Pause';
+        btn.classList.remove('active');
     }
 }
 
@@ -818,7 +847,6 @@ function saveState() {
     });
     
     historyIndex++;
-    updateUndoRedoButtons();
 }
 
 // Annuler
@@ -831,7 +859,6 @@ function undo() {
         renderGrid();
         updateProgress();
         updateNumberButtons();
-        updateUndoRedoButtons();
     }
 }
 
@@ -845,14 +872,16 @@ function redo() {
         renderGrid();
         updateProgress();
         updateNumberButtons();
-        updateUndoRedoButtons();
     }
 }
 
 // Mettre à jour les boutons undo/redo
 function updateUndoRedoButtons() {
-    document.getElementById('undo-btn').disabled = historyIndex <= 0;
-    document.getElementById('redo-btn').disabled = historyIndex >= history.length - 1;
+    // Boutons supprimés - fonction conservée pour compatibilité
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+    if (undoBtn) undoBtn.disabled = historyIndex <= 0;
+    if (redoBtn) redoBtn.disabled = historyIndex >= history.length - 1;
 }
 
 // Mettre à jour la progression
@@ -927,7 +956,14 @@ function giveHint() {
 function resetGame() {
     if (confirm('Êtes-vous sûr de vouloir recommencer ?')) {
         stopTimer();
+        elapsedTime = 0;
         hintsUsed = 0;
+        isPaused = false;
+        const pauseBtn = document.getElementById('pause-btn');
+        if (pauseBtn) {
+            pauseBtn.innerHTML = '⏸️ Pause';
+            pauseBtn.classList.remove('active');
+        }
         document.getElementById('share-btn').style.display = 'none';
         initializeGame();
     }
@@ -935,12 +971,14 @@ function resetGame() {
 
 // Chronomètre
 function startTimer() {
-    startTime = Date.now();
+    // Reprendre depuis le temps écoulé précédent
+    startTime = Date.now() - (elapsedTime * 1000);
     timerInterval = setInterval(updateTimer, 1000);
 }
 
 function updateTimer() {
     const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    elapsedTime = elapsed;
     const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
     const seconds = (elapsed % 60).toString().padStart(2, '0');
     document.getElementById('timer').textContent = `${minutes}:${seconds}`;
@@ -948,6 +986,10 @@ function updateTimer() {
 
 function stopTimer() {
     if (timerInterval) {
+        // Sauvegarder le temps écoulé avant d'arrêter
+        if (startTime) {
+            elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        }
         clearInterval(timerInterval);
         timerInterval = null;
     }
@@ -1028,11 +1070,12 @@ function checkCompletion() {
         document.querySelectorAll('.number-btn, .erase-btn').forEach(btn => {
             btn.disabled = true;
         });
-        document.getElementById('hint-btn').disabled = true;
-        document.getElementById('undo-btn').disabled = true;
-        document.getElementById('redo-btn').disabled = true;
-        document.getElementById('notes-btn').disabled = true;
-        document.getElementById('reset-btn').disabled = true;
+        const notesBtn = document.getElementById('notes-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        if (notesBtn) notesBtn.disabled = true;
+        if (resetBtn) resetBtn.disabled = true;
+        if (pauseBtn) pauseBtn.disabled = true;
         
         celebrateWin();
         setTimeout(() => {
@@ -1058,11 +1101,12 @@ function gameOver() {
     });
     
     // Désactiver aussi les autres boutons
-    document.getElementById('hint-btn').disabled = true;
-    document.getElementById('undo-btn').disabled = true;
-    document.getElementById('redo-btn').disabled = true;
-    document.getElementById('notes-btn').disabled = true;
-    document.getElementById('reset-btn').disabled = true;
+    const notesBtn = document.getElementById('notes-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    if (notesBtn) notesBtn.disabled = true;
+    if (resetBtn) resetBtn.disabled = true;
+    if (pauseBtn) pauseBtn.disabled = true;
     
     // Afficher la modale Game Over
     const modal = document.getElementById('gameover-modal');
