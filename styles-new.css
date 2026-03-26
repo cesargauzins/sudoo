@@ -355,6 +355,52 @@ h1 {
     font-weight: 500;
 }
 
+/* Sélecteur de difficulté */
+.difficulty-selector {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 4px;
+}
+
+.difficulty-btn {
+    flex: 1;
+    max-width: 120px;
+    padding: 6px 16px;
+    font-size: 0.85em;
+    font-weight: 600;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.difficulty-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.difficulty-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.difficulty-btn.completed {
+    background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+    color: white;
+    border-color: #66bb6a;
+}
+
+.difficulty-btn.completed:not(.active) {
+    opacity: 0.7;
+}
+
 .game-info {
     display: flex;
     justify-content: center;
@@ -1085,6 +1131,40 @@ body.dark-mode .sudoku-grid.notes-mode .cell.selected {
     font-weight: bold;
     color: #333;
     margin-bottom: 10px;
+}
+
+/* Onglets du classement */
+.leaderboard-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.leaderboard-tab {
+    flex: 1;
+    max-width: 200px;
+    padding: 12px 24px;
+    font-size: 1em;
+    font-weight: 600;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    background: white;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.leaderboard-tab:hover {
+    background: #f5f5f5;
+    transform: translateY(-2px);
+}
+
+.leaderboard-tab.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .leaderboard-list {
