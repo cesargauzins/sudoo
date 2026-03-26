@@ -528,6 +528,13 @@ h1 {
     justify-content: center;
 }
 
+.note-number.same-number-note {
+    background: rgba(173, 216, 230, 0.8);
+    border-radius: 3px;
+    font-weight: 700;
+    color: #1565c0;
+}
+
 /* Bordures épaisses pour les blocs 3x3 */
 .cell:nth-child(3n):not(:nth-child(9n)) {
     border-right: 3px solid #333;
