@@ -1411,4 +1411,3 @@ function closeSeeYouTomorrowModal() {
     modal.classList.remove('show');
     modal.style.display = 'none';
 }
-
