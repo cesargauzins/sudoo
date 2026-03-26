@@ -235,7 +235,7 @@ function countSolutions(grid) {
 }
 
 // Créer une grille de jeu en enlevant des cases
-function createPuzzle(completeGrid, seed, difficulty = 54) {
+function createPuzzle(completeGrid, seed, difficulty = 40) {
     const puzzle = completeGrid.map(row => [...row]);
     let cellsToRemove = difficulty;
     let attempts = 0;
@@ -267,7 +267,7 @@ function createPuzzle(completeGrid, seed, difficulty = 54) {
 function initializeGame() {
     const seed = getTodaysSeed();
     solutionGrid = generateCompleteSudoku(seed);
-    originalGrid = createPuzzle(solutionGrid, seed, 55);
+    originalGrid = createPuzzle(solutionGrid, seed, 54);
     currentGrid = originalGrid.map(row => [...row]);
     notesGrid = Array(9).fill(null).map(() => Array(9).fill(null).map(() => new Set()));
     history = [];
@@ -384,9 +384,12 @@ function highlightRegions() {
 
 // Mettre en évidence les cases avec le même numéro
 function highlightSameNumbers() {
-    // Retirer toutes les classes same-number
+    // Retirer toutes les classes same-number et same-number-note
     document.querySelectorAll('.cell').forEach(cell => {
         cell.classList.remove('same-number');
+    });
+    document.querySelectorAll('.note-number').forEach(note => {
+        note.classList.remove('same-number-note');
     });
     
     if (!selectedCell) return;
@@ -409,8 +412,47 @@ function highlightSameNumbers() {
         
         if (num === selectedNum) {
             cell.classList.add('same-number');
+        } else {
+            // Vérifier si la cellule contient des notes avec ce numéro
+            if (notesGrid[row][col].has(selectedNum)) {
+                // Mettre en évidence la note spécifique
+                const noteElements = cell.querySelectorAll('.note-number');
+                noteElements.forEach((noteEl, index) => {
+                    if (index + 1 === selectedNum && noteEl.textContent) {
+                        noteEl.classList.add('same-number-note');
+                    }
+                });
+            }
         }
     });
+}
+
+// Effacer les notes dans la ligne, colonne et carré 3x3 quand on place un chiffre
+function removeNotesInRelatedCells(row, col, num) {
+    // Effacer dans la ligne
+    for (let c = 0; c < 9; c++) {
+        if (c !== col) {
+            notesGrid[row][c].delete(num);
+        }
+    }
+    
+    // Effacer dans la colonne
+    for (let r = 0; r < 9; r++) {
+        if (r !== row) {
+            notesGrid[r][col].delete(num);
+        }
+    }
+    
+    // Effacer dans le carré 3x3
+    const startRow = Math.floor(row / 3) * 3;
+    const startCol = Math.floor(col / 3) * 3;
+    for (let r = startRow; r < startRow + 3; r++) {
+        for (let c = startCol; c < startCol + 3; c++) {
+            if (r !== row || c !== col) {
+                notesGrid[r][c].delete(num);
+            }
+        }
+    }
 }
 
 // Configurer les écouteurs d'événements
@@ -546,6 +588,9 @@ function placeNumber(num) {
                 selectedCell.classList.remove('error', 'correct', 'notes-active');
                 selectedCell.innerHTML = '';
                 selectedCell.textContent = num;
+                
+                // Effacer automatiquement les notes correspondantes dans les cellules liées
+                removeNotesInRelatedCells(row, col, num);
             }
         }
     }
