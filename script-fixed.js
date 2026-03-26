@@ -15,6 +15,13 @@ let originalGrid = [];
 let finalTime = 0;
 let database = null;
 let livesRemaining = 3;
+let currentDifficulty = 'simple'; // 'simple' ou 'difficile'
+
+// Configuration des niveaux de difficulté
+const DIFFICULTY_LEVELS = {
+    simple: { cellsToRemove: 43, label: 'Simple' },
+    difficile: { cellsToRemove: 54, label: 'Difficile' }
+};
 
 // Détection navigateur
 const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
@@ -39,9 +46,19 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('gameover-modal').style.display = 'none';
     document.getElementById('seeYouTomorrow-modal').style.display = 'none';
     
-    // Vérifier si le sudoku du jour est déjà terminé
-    if (isTodayPuzzleCompleted()) {
-        blockCompletedPuzzle();
+    // Charger le niveau sauvegardé ou démarrer en simple
+    const savedDifficulty = localStorage.getItem('current-difficulty');
+    if (savedDifficulty && (savedDifficulty === 'simple' || savedDifficulty === 'difficile')) {
+        currentDifficulty = savedDifficulty;
+    }
+    
+    updateDifficultyButtons();
+    
+    // Vérifier si les deux niveaux sont terminés
+    if (areBothLevelsCompleted()) {
+        blockAllPuzzles();
+    } else if (isTodayPuzzleCompleted(currentDifficulty)) {
+        blockCurrentPuzzle();
     } else {
         initializeGame();
     }
@@ -94,24 +111,28 @@ function getTodayKey() {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 }
 
-// Vérifier si le puzzle du jour est déjà terminé
-function isTodayPuzzleCompleted() {
+// Vérifier si le puzzle du jour est déjà terminé pour un niveau spécifique
+function isTodayPuzzleCompleted(difficulty = currentDifficulty) {
     const todayKey = getTodayKey();
-    const completedDate = localStorage.getItem('sudoku-completed-date');
-    return completedDate === todayKey;
+    const completedDate = localStorage.getItem(`sudoku-completed-${difficulty}-${todayKey}`);
+    return completedDate === 'true';
 }
 
-// Marquer le puzzle du jour comme terminé
-function markTodayPuzzleCompleted() {
+// Marquer le puzzle du jour comme terminé pour un niveau spécifique
+function markTodayPuzzleCompleted(difficulty = currentDifficulty) {
     const todayKey = getTodayKey();
-    localStorage.setItem('sudoku-completed-date', todayKey);
+    localStorage.setItem(`sudoku-completed-${difficulty}-${todayKey}`, 'true');
 }
 
-// Bloquer le jeu si déjà terminé
-function blockCompletedPuzzle() {
-    // Afficher un message
+// Vérifier si les deux niveaux sont terminés
+function areBothLevelsCompleted() {
+    return isTodayPuzzleCompleted('simple') && isTodayPuzzleCompleted('difficile');
+}
+
+// Bloquer tous les puzzles si les deux niveaux sont terminés
+function blockAllPuzzles() {
     const messageEl = document.getElementById('message');
-    messageEl.innerHTML = '🎉 <strong>Vous avez déjà terminé le Sudoku du jour !</strong><br>Revenez demain pour un nouveau défi ! 🚀';
+    messageEl.innerHTML = '🎉 <strong>Bravo ! Vous avez terminé les deux niveaux aujourd’hui !</strong><br>Revenez demain pour de nouveaux défis ! 🚀';
     messageEl.className = 'message success';
     messageEl.style.display = 'block';
     
@@ -119,6 +140,30 @@ function blockCompletedPuzzle() {
     document.querySelector('.sudoku-grid').style.display = 'none';
     document.querySelector('.number-pad').style.display = 'none';
     document.querySelectorAll('.controls').forEach(el => el.style.display = 'none');
+    document.querySelector('.difficulty-selector').style.display = 'none';
+}
+
+// Bloquer le niveau actuel mais permettre de changer de niveau
+function blockCurrentPuzzle() {
+    const messageEl = document.getElementById('message');
+    const levelName = DIFFICULTY_LEVELS[currentDifficulty].label;
+    messageEl.innerHTML = `🎉 <strong>Vous avez déjà terminé le niveau ${levelName} aujourd’hui !</strong><br>Essayez l'autre niveau ! 👆`;
+    messageEl.className = 'message success';
+    messageEl.style.display = 'block';
+    
+    // Masquer les contrôles de jeu mais garder le sélecteur de niveau
+    document.querySelector('.sudoku-grid').style.display = 'none';
+    document.querySelector('.number-pad').style.display = 'none';
+    document.querySelectorAll('.controls').forEach(el => el.style.display = 'none');
+}
+
+// Bloquer le jeu si déjà terminé (ancienne fonction, maintenant redirigée)
+function blockCompletedPuzzle() {
+    if (areBothLevelsCompleted()) {
+        blockAllPuzzles();
+    } else {
+        blockCurrentPuzzle();
+    }
 }
 
 // Générer un sudoku complet valide
@@ -235,7 +280,7 @@ function countSolutions(grid) {
 }
 
 // Créer une grille de jeu en enlevant des cases
-function createPuzzle(completeGrid, seed, difficulty = 55) {
+function createPuzzle(completeGrid, seed, difficulty = 40) {
     const puzzle = completeGrid.map(row => [...row]);
     let cellsToRemove = difficulty;
     let attempts = 0;
@@ -266,8 +311,12 @@ function createPuzzle(completeGrid, seed, difficulty = 55) {
 // Initialiser le jeu
 function initializeGame() {
     const seed = getTodaysSeed();
-    solutionGrid = generateCompleteSudoku(seed);
-    originalGrid = createPuzzle(solutionGrid, seed, 54);
+    // Utiliser une seed différente pour chaque niveau
+    const levelSeed = seed + (currentDifficulty === 'difficile' ? 10000 : 0);
+    const cellsToRemove = DIFFICULTY_LEVELS[currentDifficulty].cellsToRemove;
+    
+    solutionGrid = generateCompleteSudoku(levelSeed);
+    originalGrid = createPuzzle(solutionGrid, levelSeed, cellsToRemove);
     currentGrid = originalGrid.map(row => [...row]);
     notesGrid = Array(9).fill(null).map(() => Array(9).fill(null).map(() => new Set()));
     history = [];
@@ -276,13 +325,19 @@ function initializeGame() {
     gameCompleted = false;
     livesRemaining = 3;
     
+    // Afficher les contrôles de jeu
+    document.querySelector('.sudoku-grid').style.display = 'grid';
+    document.querySelector('.number-pad').style.display = 'grid';
+    document.querySelectorAll('.controls').forEach(el => el.style.display = 'flex');
+    
     updateLivesDisplay();
     saveState();
     renderGrid();
     updateProgress();
     updateNumberButtons();
     startTimer();
-    showMessage('Bonne chance ! 🍀', 'info');
+    const levelName = DIFFICULTY_LEVELS[currentDifficulty].label;
+    showMessage(`Niveau ${levelName} - Bonne chance ! 🍀`, 'info');
 }
 
 // Afficher la grille
@@ -455,8 +510,92 @@ function removeNotesInRelatedCells(row, col, num) {
     }
 }
 
+// Mettre à jour visuellement les cellules contenant des notes
+function updateNoteCellsDisplay() {
+    document.querySelectorAll('.cell').forEach(cell => {
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+        
+        // Si la cellule est vide et contient des notes, la mettre à jour
+        if (currentGrid[row][col] === 0 && notesGrid[row][col].size > 0) {
+            renderNotes(cell, row, col);
+        } else if (currentGrid[row][col] === 0 && notesGrid[row][col].size === 0 && cell.classList.contains('notes-active')) {
+            // Si la cellule n'a plus de notes, nettoyer l'affichage
+            cell.classList.remove('notes-active');
+            cell.innerHTML = '';
+        }
+    });
+}
+
+// Changer le niveau de difficulté
+function changeDifficulty(newDifficulty) {
+    if (newDifficulty === currentDifficulty) return;
+    
+    // Sauvegarder le choix
+    currentDifficulty = newDifficulty;
+    localStorage.setItem('current-difficulty', currentDifficulty);
+    
+    // Arrêter le timer actuel
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    
+    // Mettre à jour les boutons
+    updateDifficultyButtons();
+    
+    // Vérifier si ce niveau est déjà terminé
+    if (isTodayPuzzleCompleted(currentDifficulty)) {
+        blockCurrentPuzzle();
+    } else {
+        // Réinitialiser et démarrer le nouveau niveau
+        document.getElementById('message').style.display = 'none';
+        initializeGame();
+    }
+}
+
+// Mettre à jour l'apparence des boutons de difficulté
+function updateDifficultyButtons() {
+    const simpleBtn = document.getElementById('difficulty-simple');
+    const difficileBtn = document.getElementById('difficulty-difficile');
+    
+    if (!simpleBtn || !difficileBtn) return;
+    
+    // Retirer la classe active des deux
+    simpleBtn.classList.remove('active');
+    difficileBtn.classList.remove('active');
+    
+    // Ajouter la classe active au bouton actuel
+    if (currentDifficulty === 'simple') {
+        simpleBtn.classList.add('active');
+    } else {
+        difficileBtn.classList.add('active');
+    }
+    
+    // Désactiver les boutons des niveaux déjà terminés
+    if (isTodayPuzzleCompleted('simple')) {
+        simpleBtn.classList.add('completed');
+        simpleBtn.innerHTML = '✓ Simple';
+    } else {
+        simpleBtn.classList.remove('completed');
+        simpleBtn.innerHTML = 'Simple';
+    }
+    
+    if (isTodayPuzzleCompleted('difficile')) {
+        difficileBtn.classList.add('completed');
+        difficileBtn.innerHTML = '✓ Difficile';
+    } else {
+        difficileBtn.classList.remove('completed');
+        difficileBtn.innerHTML = 'Difficile';
+    }
+}
+
 // Configurer les écouteurs d'événements
 function setupEventListeners() {
+    // Boutons de changement de difficulté
+    document.getElementById('difficulty-simple')?.addEventListener('click', () => changeDifficulty('simple'));
+    document.getElementById('difficulty-difficile')?.addEventListener('click', () => changeDifficulty('difficile'));
+    
     document.addEventListener('keydown', (e) => {
         if (!selectedCell) return;
         
@@ -583,14 +722,19 @@ function placeNumber(num) {
                 // Si correct, garder le chiffre
                 currentGrid[row][col] = num;
                 notesGrid[row][col].clear();
-                selectedCell.textContent = num;
-                selectedCell.classList.add('user-input');
-                selectedCell.classList.remove('error', 'correct', 'notes-active');
-                selectedCell.innerHTML = '';
-                selectedCell.textContent = num;
                 
                 // Effacer automatiquement les notes correspondantes dans les cellules liées
                 removeNotesInRelatedCells(row, col, num);
+                
+                // Re-rendre la grille complète pour afficher tous les changements
+                renderGrid();
+                
+                // Re-sélectionner la cellule après le re-rendu
+                const cells = document.querySelectorAll('.cell');
+                selectedCell = cells[row * 9 + col];
+                if (selectedCell) {
+                    selectedCell.classList.add('selected');
+                }
             }
         }
     }
@@ -1068,12 +1212,13 @@ async function submitScore() {
             time: finalTime,
             hints: hintsUsed,
             errors: errorsCount,
+            difficulty: currentDifficulty,
             date: new Date().toISOString(),
             timestamp: Date.now()
         };
         
-        // Sauvegarder le score dans Firebase
-        await database.ref(`scores/${today}`).push(scoreData);
+        // Sauvegarder le score dans Firebase avec le niveau
+        await database.ref(`scores/${today}/${currentDifficulty}`).push(scoreData);
         
         closeNameModal();
         showMessage('🎉 Score enregistré avec succès !', 'success');
@@ -1090,7 +1235,7 @@ async function submitScore() {
 }
 
 // Afficher le classement
-async function showLeaderboard() {
+async function showLeaderboard(selectedDifficulty = currentDifficulty) {
     // S'assurer que le modal de nom est complètement fermé
     const nameModal = document.getElementById('name-modal');
     nameModal.classList.remove('show');
@@ -1101,8 +1246,38 @@ async function showLeaderboard() {
     const userRankDiv = document.getElementById('user-rank');
     
     modal.style.display = 'flex';
-    
     modal.classList.add('show');
+    
+    // Créer les onglets de difficulté
+    const tabsHtml = `
+        <div class="leaderboard-tabs">
+            <button class="leaderboard-tab ${selectedDifficulty === 'simple' ? 'active' : ''}" data-difficulty="simple">
+                📊 Simple
+            </button>
+            <button class="leaderboard-tab ${selectedDifficulty === 'difficile' ? 'active' : ''}" data-difficulty="difficile">
+                🏆 Difficile
+            </button>
+        </div>
+    `;
+    
+    // Insérer les onglets avant la liste (si pas déjà fait)
+    if (!document.querySelector('.leaderboard-tabs')) {
+        leaderboardList.insertAdjacentHTML('beforebegin', tabsHtml);
+        
+        // Ajouter les événements sur les onglets
+        document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const difficulty = tab.dataset.difficulty;
+                showLeaderboard(difficulty);
+            });
+        });
+    } else {
+        // Mettre à jour l'onglet actif
+        document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.difficulty === selectedDifficulty);
+        });
+    }
+    
     leaderboardList.innerHTML = '<div class="loading">Chargement du classement...</div>';
     userRankDiv.innerHTML = '';
     
@@ -1113,7 +1288,7 @@ async function showLeaderboard() {
     
     try {
         const today = getTodayKey();
-        const snapshot = await database.ref(`scores/${today}`).orderByChild('time').once('value');
+        const snapshot = await database.ref(`scores/${today}/${selectedDifficulty}`).orderByChild('time').once('value');
         
         const scores = [];
         snapshot.forEach((childSnapshot) => {
@@ -1124,7 +1299,8 @@ async function showLeaderboard() {
         });
         
         if (scores.length === 0) {
-            leaderboardList.innerHTML = '<div class="loading">Aucun score enregistré pour aujourd\'hui</div>';
+            const levelName = DIFFICULTY_LEVELS[selectedDifficulty].label;
+            leaderboardList.innerHTML = `<div class="loading">Aucun score enregistré pour le niveau ${levelName} aujourd'hui</div>`;
             return;
         }
         
@@ -1235,3 +1411,4 @@ function closeSeeYouTomorrowModal() {
     modal.classList.remove('show');
     modal.style.display = 'none';
 }
+
