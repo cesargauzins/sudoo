@@ -267,7 +267,7 @@ function createPuzzle(completeGrid, seed, difficulty = 54) {
 function initializeGame() {
     const seed = getTodaysSeed();
     solutionGrid = generateCompleteSudoku(seed);
-    originalGrid = createPuzzle(solutionGrid, seed, 40);
+    originalGrid = createPuzzle(solutionGrid, seed, 60);
     currentGrid = originalGrid.map(row => [...row]);
     notesGrid = Array(9).fill(null).map(() => Array(9).fill(null).map(() => new Set()));
     history = [];
