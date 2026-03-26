@@ -216,45 +216,68 @@ body.dark-mode .erase-btn:hover {
     font-size: 0.85em;
 }
 
-/* Fix pour Edge et Firefox */
+/* Fix pour Edge et Firefox - ADAPTATIF COMPLET SANS SCROLL */
 .edge-firefox-browser body {
-    padding: 3px 8px;
+    padding: 0;
+    overflow: hidden;
 }
 
 .edge-firefox-browser .container {
-    padding: 4px;
-    max-height: calc(100vh - 6px);
-    border-radius: 15px;
+    padding: 2px;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .edge-firefox-browser header {
     margin-bottom: 1px;
+    flex-shrink: 0;
 }
 
 .edge-firefox-browser h1 {
-    font-size: 1.1em;
-    margin-bottom: 0px;
+    font-size: 0.85em;
+    margin-bottom: 0;
+    line-height: 1;
 }
 
 .edge-firefox-browser .date {
-    font-size: 0.75em;
+    font-size: 0.6em;
+    margin-bottom: 1px;
+    line-height: 1;
+}
+
+.edge-firefox-browser #view-leaderboard-btn {
+    padding: 2px 4px;
+    font-size: 0.6em;
+    margin-top: 1px;
+    min-height: auto;
+    line-height: 1.2;
 }
 
 .edge-firefox-browser .game-info {
-    padding: 3px;
-    margin-bottom: 2px;
-    gap: 10px;
+    padding: 1px;
+    margin-bottom: 1px;
+    gap: 4px;
+    flex-shrink: 0;
 }
 
 .edge-firefox-browser .timer,
 .edge-firefox-browser .lives {
+    font-size: 0.7em;
+    gap: 2px;
+}
+
+.edge-firefox-browser .timer-label,
+.edge-firefox-browser .lives-label {
     font-size: 0.9em;
-    gap: 4px;
 }
 
 .edge-firefox-browser #timer,
 .edge-firefox-browser #lives {
-    font-size: 1em;
+    font-size: 0.8em;
 }
 
 .edge-firefox-browser .progress-container {
@@ -262,46 +285,56 @@ body.dark-mode .erase-btn:hover {
 }
 
 .edge-firefox-browser .sudoku-grid {
-    margin-bottom: 3px;
-    border: 2px solid #333;
+    margin-bottom: 1px;
+    border: 1px solid #333;
+    width: 100%;
+    height: auto;
+    max-height: calc(100vh - 280px);
+    aspect-ratio: 1;
+    flex-shrink: 1;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .edge-firefox-browser .cell {
-    font-size: 1.15em;
+    font-size: 0.95em;
+    border: 0.5px solid #ddd;
 }
 
 .edge-firefox-browser .number-pad {
-    gap: 3px;
-    margin: 3px 0;
+    gap: 1px;
+    margin: 1px 0;
+    flex-shrink: 0;
 }
 
 .edge-firefox-browser .number-btn,
 .edge-firefox-browser .erase-btn {
-    padding: 6px;
-    font-size: 1em;
+    padding: 3px;
+    font-size: 0.75em;
+    min-height: 24px;
+    line-height: 1;
 }
 
 .edge-firefox-browser .controls {
-    gap: 3px;
-    margin-bottom: 3px;
+    gap: 1px;
+    margin-bottom: 1px;
+    flex-shrink: 0;
 }
 
 .edge-firefox-browser .btn {
-    padding: 6px;
-    font-size: 0.8em;
+    padding: 3px;
+    font-size: 0.65em;
+    min-height: 22px;
+    line-height: 1.2;
 }
 
 .edge-firefox-browser .message {
-    padding: 4px;
-    font-size: 0.75em;
-    min-height: 20px;
-    margin-bottom: 2px;
-}
-
-.edge-firefox-browser #view-leaderboard-btn {
-    padding: 6px 10px;
-    font-size: 0.85em;
-    margin-top: 0;
+    padding: 1px;
+    font-size: 0.6em;
+    min-height: 14px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    line-height: 1.2;
 }
 
 header {
@@ -493,6 +526,13 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.note-number.same-number-note {
+    background: rgba(173, 216, 230, 0.8);
+    border-radius: 3px;
+    font-weight: 700;
+    color: #1565c0;
 }
 
 /* Bordures épaisses pour les blocs 3x3 */
