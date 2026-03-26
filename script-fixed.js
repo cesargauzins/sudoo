@@ -904,9 +904,11 @@ function giveHint() {
     
     hintsUsed++;
     
-    // Ajouter 30 secondes de pénalité au chronomètre
+    // Ajouter pénalité au chronomètre (1 minute pour difficile, 30 secondes pour simple)
+    const penaltyTime = currentDifficulty === 'difficile' ? 60000 : 30000; // 60s ou 30s en millisecondes
+    const penaltySeconds = currentDifficulty === 'difficile' ? 60 : 30;
     if (startTime) {
-        startTime -= 30000; // Soustraire 30 secondes en millisecondes
+        startTime -= penaltyTime;
     }
     
     // Animation rouge sur le timer
@@ -918,7 +920,7 @@ function giveHint() {
     
     updateProgress();
     updateNumberButtons();
-    showMessage(`Indice donné ! (+30s de pénalité, ${hintsUsed} utilisés)`, 'info');
+    showMessage(`Indice donné ! (+${penaltySeconds}s de pénalité, ${hintsUsed} utilisés)`, 'info');
 }
 
 // Réinitialiser le jeu
@@ -1248,6 +1250,9 @@ async function showLeaderboard(selectedDifficulty = currentDifficulty) {
     modal.style.display = 'flex';
     modal.classList.add('show');
     
+    leaderboardList.innerHTML = '<div class="loading">Chargement du classement...</div>';
+    userRankDiv.innerHTML = '';
+    
     // Créer les onglets de difficulté
     const tabsHtml = `
         <div class="leaderboard-tabs">
@@ -1277,9 +1282,6 @@ async function showLeaderboard(selectedDifficulty = currentDifficulty) {
             tab.classList.toggle('active', tab.dataset.difficulty === selectedDifficulty);
         });
     }
-    
-    leaderboardList.innerHTML = '<div class="loading">Chargement du classement...</div>';
-    userRankDiv.innerHTML = '';
     
     if (!database) {
         leaderboardList.innerHTML = '<div class="loading">⚠️ Le classement nécessite la configuration de Firebase.<br><br>Consultez le README.md pour les instructions.</div>';
@@ -1411,3 +1413,4 @@ function closeSeeYouTomorrowModal() {
     modal.classList.remove('show');
     modal.style.display = 'none';
 }
+
