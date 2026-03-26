@@ -235,7 +235,7 @@ function countSolutions(grid) {
 }
 
 // Créer une grille de jeu en enlevant des cases
-function createPuzzle(completeGrid, seed, difficulty = 40) {
+function createPuzzle(completeGrid, seed, difficulty = 54) {
     const puzzle = completeGrid.map(row => [...row]);
     let cellsToRemove = difficulty;
     let attempts = 0;
