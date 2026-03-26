@@ -495,6 +495,13 @@ h1 {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     flex-shrink: 0;
     box-sizing: border-box;
+    transition: filter 0.3s ease;
+}
+
+.sudoku-grid.paused {
+    filter: blur(10px);
+    pointer-events: none;
+    user-select: none;
 }
 
 .cell {
@@ -1446,4 +1453,5 @@ body.dark-mode .leaderboard-item:hover {
         display: none;
     }
 }
+
 
