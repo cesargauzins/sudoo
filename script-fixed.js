@@ -1237,7 +1237,7 @@ async function submitScore() {
 }
 
 // Afficher le classement
-async function showLeaderboard(selectedDifficulty = currentDifficulty) {
+async function showLeaderboard(selectedDifficulty = 'simple') {
     // S'assurer que le modal de nom est complètement fermé
     const nameModal = document.getElementById('name-modal');
     nameModal.classList.remove('show');
