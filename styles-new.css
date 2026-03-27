@@ -350,9 +350,7 @@ h1 {
 }
 
 .date {
-    color: #666;
-    font-size: 0.85em;
-    font-weight: 500;
+    display: none;
 }
 
 /* Sélecteur de difficulté */
@@ -499,9 +497,10 @@ h1 {
 }
 
 .sudoku-grid.paused {
-    filter: blur(10px);
+    filter: blur(20px);
     pointer-events: none;
     user-select: none;
+    opacity: 0.5;
 }
 
 .cell {
