@@ -873,28 +873,21 @@ body.dark-mode .sudoku-grid.notes-mode .cell.selected {
     }
     
     .game-controls-bar {
-        flex-wrap: wrap;
-        gap: 8px;
-        padding: 8px;
+        gap: 6px;
+        padding: 6px 0;
     }
     
     .difficulty-selector {
-        order: 1;
-        width: 100%;
-        justify-content: center;
+        gap: 4px;
     }
     
-    .timer {
-        order: 0;
-    }
-    
-    .lives {
-        order: 2;
+    .difficulty-btn {
+        padding: 6px 12px;
+        font-size: 0.75em;
     }
     
     .timer, .lives {
-        justify-content: center !important;
-        font-size: 1em;
+        font-size: 0.9em;
     }
 
     .cell {
@@ -1482,4 +1475,3 @@ body.dark-mode .leaderboard-item:hover {
         display: none;
     }
 }
-
