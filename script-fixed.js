@@ -540,11 +540,12 @@ function changeDifficulty(newDifficulty) {
     currentDifficulty = newDifficulty;
     localStorage.setItem('current-difficulty', currentDifficulty);
     
-    // Arrêter le timer actuel
+    // Arrêter le timer actuel et réinitialiser le temps
     if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
     }
+    elapsedTime = 0;
     
     // Mettre à jour les boutons
     updateDifficultyButtons();
@@ -1457,3 +1458,4 @@ function closeSeeYouTomorrowModal() {
     modal.classList.remove('show');
     modal.style.display = 'none';
 }
+
