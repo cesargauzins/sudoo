@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('leaderboard-modal').style.display = 'none';
     document.getElementById('gameover-modal').style.display = 'none';
     document.getElementById('seeYouTomorrow-modal').style.display = 'none';
+    document.getElementById('countdown-modal').style.display = 'none';
     
     // Charger le niveau sauvegardé ou démarrer en simple
     const savedDifficulty = localStorage.getItem('current-difficulty');
@@ -339,9 +340,58 @@ function initializeGame() {
     renderGrid();
     updateProgress();
     updateNumberButtons();
-    startTimer();
+    
     const levelName = DIFFICULTY_LEVELS[currentDifficulty].label;
     showMessage(`Niveau ${levelName} - Bonne chance ! 🍀`, 'info');
+    
+    // Lancer le compte à rebours de 3 secondes avant de démarrer le timer
+    showCountdown();
+}
+
+// Afficher le compte à rebours de 3 secondes
+function showCountdown() {
+    const modal = document.getElementById('countdown-modal');
+    const numberElement = document.getElementById('countdown-number');
+    const countdownText = modal.querySelector('.countdown-text');
+    
+    modal.style.display = 'flex';
+    modal.classList.add('show');
+    
+    // Réinitialiser
+    numberElement.style.fontSize = '';
+    numberElement.textContent = '3';
+    countdownText.style.display = '';
+    
+    let count = 3;
+    
+    const triggerAnimation = () => {
+        numberElement.style.animation = 'none';
+        void numberElement.offsetWidth; // force reflow
+        numberElement.style.animation = 'countdownScale 0.9s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    };
+    
+    triggerAnimation();
+    
+    const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+            numberElement.textContent = count;
+            triggerAnimation();
+        } else {
+            numberElement.textContent = 'GO !';
+            numberElement.style.fontSize = '4.5em';
+            countdownText.style.display = 'none';
+            triggerAnimation();
+            
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+                startTimer();
+            }, 900);
+            
+            clearInterval(countdownInterval);
+        }
+    }, 1000);
 }
 
 // Afficher la grille
@@ -645,7 +695,7 @@ function setupEventListeners() {
     });
     
     // Événements pour les modales
-    document.getElementById('view-leaderboard-btn').addEventListener('click', showLeaderboard);
+    document.getElementById('view-leaderboard-btn').addEventListener('click', () => showLeaderboard('simple'));
     document.getElementById('submit-score-btn').addEventListener('click', submitScore);
     document.getElementById('skip-score-btn').addEventListener('click', closeNameModal);
     document.getElementById('close-leaderboard').addEventListener('click', closeLeaderboard);
@@ -1403,6 +1453,9 @@ function closeLeaderboard() {
     const modal = document.getElementById('leaderboard-modal');
     modal.classList.remove('show');
     modal.style.display = 'none';
+    // Supprimer les onglets pour qu'ils soient recréés proprement à la prochaine ouverture
+    const tabs = document.querySelector('.leaderboard-tabs');
+    if (tabs) tabs.remove();
 }
 
 // Obtenir le suffixe ordinal (er, ème)
@@ -1458,4 +1511,3 @@ function closeSeeYouTomorrowModal() {
     modal.classList.remove('show');
     modal.style.display = 'none';
 }
-
