@@ -216,6 +216,159 @@ body.dark-mode .erase-btn:hover {
     font-size: 0.85em;
 }
 
+/* ============================================
+   Fix pour Safari (Desktop + iOS)
+   ============================================ */
+.safari-browser body {
+    /* Safari: utiliser -webkit-fill-available pour le vrai viewport */
+    height: -webkit-fill-available;
+    padding: 3px 10px;
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.safari-browser .container {
+    padding: 5px;
+    max-height: calc(100vh - 6px);
+    /* Safari fallback pour les écrans avec notch / barre d'adresse */
+    max-height: -webkit-fill-available;
+    max-height: calc(100svh - 6px);
+    overflow: hidden;
+}
+
+.safari-browser header {
+    margin-bottom: 3px;
+}
+
+.safari-browser h1 {
+    font-size: 1.1em;
+    margin-bottom: 2px;
+}
+
+.safari-browser #view-leaderboard-btn {
+    padding: 5px 12px;
+    font-size: 0.8em;
+    margin-top: 3px;
+}
+
+.safari-browser .game-controls-bar {
+    padding: 4px 0;
+    margin-bottom: 4px;
+    gap: 8px;
+}
+
+.safari-browser .timer,
+.safari-browser .lives {
+    font-size: 0.85em;
+    gap: 3px;
+}
+
+.safari-browser #timer,
+.safari-browser #lives {
+    font-size: 0.95em;
+}
+
+.safari-browser .difficulty-btn {
+    padding: 5px 16px;
+    font-size: 0.8em;
+}
+
+.safari-browser .progress-container {
+    height: 14px;
+    margin-bottom: 4px;
+}
+
+.safari-browser .sudoku-grid {
+    margin-bottom: 4px;
+    max-width: 450px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    border: 2px solid #333;
+    /* Safari: forcer l'aspect-ratio avec les préfixes WebKit */
+    -webkit-aspect-ratio: 1;
+    aspect-ratio: 1;
+    flex-shrink: 1;
+    min-height: 0;
+}
+
+.safari-browser .cell {
+    font-size: 1.15em;
+    border: 0.5px solid #ddd;
+}
+
+.safari-browser .cell:nth-child(3n):not(:nth-child(9n)) {
+    border-right: 2px solid #333;
+}
+
+.safari-browser .cell:nth-child(n+19):nth-child(-n+27),
+.safari-browser .cell:nth-child(n+46):nth-child(-n+54) {
+    border-bottom: 2px solid #333;
+}
+
+.safari-browser .number-pad {
+    gap: 3px;
+    margin: 4px auto;
+    max-width: 450px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    flex-shrink: 0;
+}
+
+.safari-browser .number-btn,
+.safari-browser .erase-btn {
+    padding: 7px 4px;
+    font-size: 1.0em;
+    border: 1px solid #667eea;
+    width: 100%;
+    border-radius: 9px;
+    font-weight: bold;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.safari-browser .controls {
+    gap: 3px;
+    margin-bottom: 4px;
+    max-width: 450px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-shrink: 0;
+}
+
+.safari-browser .btn {
+    padding: 7px;
+    font-size: 0.8em;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.safari-browser .message {
+    padding: 4px;
+    font-size: 0.8em;
+    min-height: 22px;
+    margin-bottom: 3px;
+    flex-shrink: 0;
+}
+
+/* Fix touch events Safari */
+.safari-browser .cell,
+.safari-browser .number-btn,
+.safari-browser .erase-btn,
+.safari-browser .btn {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* iOS Safari: empêcher le zoom sur focus des inputs */
+.safari-browser input[type="text"] {
+    font-size: 16px;
+}
+
 /* Fix pour Edge et Firefox */
 .edge-firefox-browser body {
     padding: 4px;
