@@ -26,15 +26,21 @@ const DIFFICULTY_LEVELS = {
 };
 
 // Détection navigateur
-const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
-const isEdge = /Edg/.test(navigator.userAgent);
-const isFirefox = /Firefox/.test(navigator.userAgent);
+const isEdge = /Edg\//.test(navigator.userAgent);
+const isFirefox = /Firefox\//.test(navigator.userAgent);
+// Safari contient "Safari" mais PAS "Chrome" ni "Edg" ni "Firefox" dans son UA
+const isSafari = /Safari\//.test(navigator.userAgent) && !/Chrome\//.test(navigator.userAgent) && !isEdge && !isFirefox;
+// Chrome contient "Chrome" mais PAS "Edg", et n'est pas Safari pur
+const isChrome = /Chrome\//.test(navigator.userAgent) && !isEdge && !isFirefox && !isSafari;
 
 if (isChrome) {
     document.body.classList.add('chrome-browser');
 }
 if (isEdge || isFirefox) {
     document.body.classList.add('edge-firefox-browser');
+}
+if (isSafari) {
+    document.body.classList.add('safari-browser');
 }
 
 // Initialisation
