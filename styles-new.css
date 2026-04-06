@@ -8,6 +8,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     height: 100vh;
+    height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -95,6 +96,7 @@ body.dark-mode .erase-btn:hover {
     max-width: 600px;
     width: 100%;
     max-height: calc(100vh - 30px);
+    max-height: calc(100svh - 8px);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -153,6 +155,8 @@ body.dark-mode .erase-btn:hover {
     margin-bottom: 4px;
     max-width: 450px;
     width: 100%;
+    width: min(100%, calc(100vh - 245px));
+    width: min(100%, calc(100svh - 245px));
     margin-left: auto;
     margin-right: auto;
     border: 2px solid #333;
@@ -282,6 +286,8 @@ body.dark-mode .erase-btn:hover {
     margin-bottom: 4px;
     max-width: 450px;
     width: 100%;
+    width: min(100%, calc(100vh - 245px));
+    width: min(100%, calc(100svh - 245px));
     margin-left: auto;
     margin-right: auto;
     border: 2px solid #333;
@@ -447,6 +453,8 @@ body.dark-mode .erase-btn:hover {
     margin-bottom: 3px;
     border: 2px solid #333;
     width: 100%;
+    width: min(100%, calc(100vh - 220px));
+    width: min(100%, calc(100svh - 220px));
     aspect-ratio: 1 / 1;
     flex-shrink: 0;
     box-sizing: border-box;
@@ -682,9 +690,11 @@ h1 {
     grid-template-columns: repeat(9, 1fr);
     gap: 0;
     width: 100%;
+    width: min(100%, calc(100vh - 345px));
+    width: min(100%, calc(100svh - 345px));
     aspect-ratio: 1;
     border: 3px solid #333;
-    margin-bottom: 6px;
+    margin: 0 auto 6px;
     background: #333;
     border-radius: 6px;
     overflow: hidden;
@@ -1088,6 +1098,156 @@ body.dark-mode .sudoku-grid.notes-mode .cell.selected {
     .number-btn, .erase-btn {
         padding: 8px;
         font-size: 1em;
+    }
+}
+
+/* ============================================
+   RESPONSIVE PAR HAUTEUR — Universel tous navigateurs
+   L'interface s'adapte selon l'espace vertical disponible.
+   Ces règles s'appliquent sur TOUS les navigateurs (Chrome, Safari,
+   Firefox, Edge, Samsung, Opera…) quel que soit l'appareil.
+   ============================================ */
+
+/* ── Phase 1 : Compact (≤ 720 px de hauteur visible) ─────────────────────
+   Couvre la plupart des smartphones en portrait avec barre d'adresse
+   visible (iPhone 6/7/8, SE 2nd/3rd gen, Galaxy S, Pixel, etc.)          */
+@media screen and (max-height: 720px) {
+    body {
+        padding: 4px 8px !important;
+    }
+    .container {
+        padding: 4px 8px !important;
+        max-height: calc(100vh - 8px) !important;
+        max-height: calc(100svh - 4px) !important;
+        border-radius: 14px !important;
+    }
+    header {
+        margin-bottom: 2px !important;
+    }
+    h1 {
+        font-size: 1.05em !important;
+        margin-bottom: 1px !important;
+    }
+    #view-leaderboard-btn {
+        padding: 4px 10px !important;
+        font-size: 0.72em !important;
+        margin-top: 2px !important;
+    }
+    .game-controls-bar {
+        padding: 3px 0 !important;
+        margin-bottom: 3px !important;
+        gap: 6px !important;
+    }
+    .timer, .lives {
+        font-size: 0.78em !important;
+    }
+    #timer, #lives {
+        font-size: 0.88em !important;
+    }
+    .difficulty-btn {
+        padding: 4px 10px !important;
+        font-size: 0.75em !important;
+    }
+    .progress-container {
+        display: none !important;
+    }
+    /* Grille : limitée par la hauteur disponible après les autres éléments */
+    .sudoku-grid {
+        margin-bottom: 3px !important;
+        width: min(100%, calc(100vh - 255px)) !important;
+        width: min(100%, calc(100svh - 255px)) !important;
+    }
+    .number-pad {
+        gap: 3px !important;
+        margin: 3px auto !important;
+    }
+    .number-btn, .erase-btn {
+        padding: 7px 4px !important;
+        font-size: 1em !important;
+    }
+    .controls {
+        gap: 3px !important;
+        margin-bottom: 3px !important;
+        flex-direction: row !important;
+    }
+    .btn {
+        padding: 6px !important;
+        font-size: 0.8em !important;
+    }
+    .message {
+        min-height: 20px !important;
+        padding: 3px !important;
+        font-size: 0.78em !important;
+        margin-bottom: 2px !important;
+    }
+}
+
+/* ── Phase 2 : Très compact (≤ 620 px) ────────────────────────────────────
+   Petits téléphones anciens (iPhone SE 1ère gen, petits Android)
+   ou mode paysage sur téléphone standard                                   */
+@media screen and (max-height: 620px) {
+    body {
+        padding: 2px 6px !important;
+    }
+    .container {
+        padding: 3px 6px !important;
+        max-height: calc(100vh - 4px) !important;
+        max-height: calc(100svh - 2px) !important;
+        border-radius: 10px !important;
+    }
+    header {
+        margin-bottom: 1px !important;
+    }
+    h1 {
+        font-size: 0.9em !important;
+        margin-bottom: 0 !important;
+    }
+    /* Masquer le bouton classement : récupère ~34 px */
+    #view-leaderboard-btn {
+        display: none !important;
+    }
+    /* Masquer les icônes timer/vies pour gagner de la place */
+    .timer-label, .lives-label {
+        display: none !important;
+    }
+    .game-controls-bar {
+        padding: 2px 0 !important;
+        margin-bottom: 2px !important;
+        gap: 4px !important;
+    }
+    .timer, .lives {
+        font-size: 0.75em !important;
+    }
+    .difficulty-btn {
+        padding: 3px 8px !important;
+        font-size: 0.72em !important;
+    }
+    .sudoku-grid {
+        margin-bottom: 2px !important;
+        width: min(100%, calc(100vh - 195px)) !important;
+        width: min(100%, calc(100svh - 195px)) !important;
+    }
+    .number-pad {
+        gap: 2px !important;
+        margin: 2px auto !important;
+    }
+    .number-btn, .erase-btn {
+        padding: 5px 2px !important;
+        font-size: 0.9em !important;
+    }
+    .controls {
+        gap: 2px !important;
+        margin-bottom: 2px !important;
+    }
+    .btn {
+        padding: 4px !important;
+        font-size: 0.72em !important;
+    }
+    .message {
+        min-height: 14px !important;
+        padding: 2px !important;
+        font-size: 0.7em !important;
+        margin-bottom: 1px !important;
     }
 }
 
