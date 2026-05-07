@@ -16,6 +16,7 @@ let originalGrid = [];
 let finalTime = 0;
 let database = null;
 let livesRemaining = 3;
+let isGameLost = false;
 let currentDifficulty = 'simple'; // 'simple' ou 'difficile'
 let isPaused = false;
 
@@ -706,6 +707,11 @@ function setupEventListeners() {
     document.getElementById('skip-score-btn').addEventListener('click', closeNameModal);
     document.getElementById('close-leaderboard').addEventListener('click', closeLeaderboard);
     document.getElementById('view-solution-btn').addEventListener('click', showSolution);
+    document.getElementById('submit-loss-score-btn').addEventListener('click', submitLossScore);
+    document.getElementById('skip-loss-score-btn').addEventListener('click', hideLossNameSection);
+    document.getElementById('loss-player-name').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submitLossScore();
+    });
     document.getElementById('view-final-leaderboard-btn').addEventListener('click', () => {
         closeSeeYouTomorrowModal();
         showLeaderboard();
@@ -1147,6 +1153,7 @@ function checkCompletion() {
 // Game Over - le joueur a perdu toutes ses vies
 function gameOver() {
     gameCompleted = true;
+    isGameLost = true;
     stopTimer();
     
     // Marquer le puzzle comme perdu (impossible de le refaire)
@@ -1169,6 +1176,52 @@ function gameOver() {
     const modal = document.getElementById('gameover-modal');
     modal.style.display = 'flex';
     modal.classList.add('show');
+}
+
+// Cacher la section de saisie du nom après une défaite
+function hideLossNameSection() {
+    const section = document.getElementById('loss-name-section');
+    if (section) section.style.display = 'none';
+}
+
+// Enregistrer le score d'un joueur ayant perdu
+async function submitLossScore() {
+    const rawName = document.getElementById('loss-player-name').value;
+    const playerName = sanitizeName(rawName);
+
+    if (!playerName || playerName.length < 2) {
+        showMessage('Veuillez entrer un nom valide (2-10 caractères) !', 'error');
+        return;
+    }
+
+    if (!database) {
+        showMessage('⚠️ Configurez Firebase pour activer le classement (voir README.md)', 'info');
+        hideLossNameSection();
+        return;
+    }
+
+    try {
+        const today = getTodayKey();
+        const scoreData = {
+            name: playerName,
+            time: 999999,
+            lost: true,
+            hints: hintsUsed,
+            errors: errorsCount,
+            difficulty: currentDifficulty,
+            date: new Date().toISOString(),
+            timestamp: Date.now()
+        };
+
+        await database.ref(`scores/${today}/${currentDifficulty}`).push(scoreData);
+
+        hideLossNameSection();
+        showMessage('✓ Vous apparaissez maintenant dans le classement !', 'success');
+
+    } catch (error) {
+        console.error('Erreur lors de l\'enregistrement:', error);
+        showMessage('Erreur lors de l\'enregistrement du score', 'error');
+    }
 }
 
 // Afficher la solution
@@ -1407,29 +1460,40 @@ async function showLeaderboard(selectedDifficulty = 'simple') {
             return;
         }
         
-        // Trier par temps (déjà trié par Firebase, mais on s'assure)
-        scores.sort((a, b) => a.time - b.time);
+        // Trier par temps : perdants à la fin, puis par ordre croissant de temps
+        scores.sort((a, b) => {
+            if (a.lost && !b.lost) return 1;
+            if (!a.lost && b.lost) return -1;
+            return a.time - b.time;
+        });
         
         // Construire le HTML du classement
         leaderboardList.innerHTML = '';
-        scores.forEach((score, index) => {
+        let winnerRank = 0;
+        scores.forEach((score) => {
             const item = document.createElement('div');
             item.className = 'leaderboard-item';
             
-            if (index < 3) {
-                item.classList.add('top-3');
+            const date = new Date(score.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+            let rankDisplay, timeDisplay;
+            
+            if (score.lost) {
+                rankDisplay = '-';
+                timeDisplay = '<span class="lost-text">Perdu</span>';
+            } else {
+                winnerRank++;
+                const medal = winnerRank === 1 ? '🥇' : winnerRank === 2 ? '🥈' : winnerRank === 3 ? '🥉' : '';
+                if (winnerRank <= 3) item.classList.add('top-3');
+                rankDisplay = `${medal} ${winnerRank}`;
+                const minutes = Math.floor(score.time / 60).toString().padStart(2, '0');
+                const seconds = (score.time % 60).toString().padStart(2, '0');
+                timeDisplay = `${minutes}:${seconds}`;
             }
             
-            const rank = index + 1;
-            const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
-            const minutes = Math.floor(score.time / 60).toString().padStart(2, '0');
-            const seconds = (score.time % 60).toString().padStart(2, '0');
-            const date = new Date(score.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-            
             item.innerHTML = `
-                <div class="rank-col">${medal} ${rank}</div>
+                <div class="rank-col">${rankDisplay}</div>
                 <div class="name-col">${escapeHtml(score.name)}</div>
-                <div class="time-col">${minutes}:${seconds}</div>
+                <div class="time-col">${timeDisplay}</div>
                 <div class="date-col">${date}</div>
             `;
             
