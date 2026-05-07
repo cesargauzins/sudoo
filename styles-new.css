@@ -1422,6 +1422,22 @@ body.dark-mode .sudoku-grid.notes-mode .cell.selected {
     margin-top: 10px;
 }
 
+#submit-loss-score-btn {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#skip-loss-score-btn {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.lost-text {
+    color: #e53e3e;
+    font-weight: bold;
+}
+
 /* Styles pour la modale À demain */
 .seeYouTomorrow-content {
     max-width: 500px;
