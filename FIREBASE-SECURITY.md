@@ -43,9 +43,12 @@ La protection de votre base de données se fait dans la Console Firebase avec de
     "scores": {
       "$date": {
         ".read": true,
-        "$scoreId": {
-          ".write": true,
-          ".validate": "newData.hasChildren(['name', 'time'])"
+        "$difficulty": {
+          "$scoreId": {
+            ".write": true,
+            ".validate": "newData.hasChildren(['name', 'time', 'difficulty'])"
+          },
+          ".indexOn": ["time"]
         }
       }
     }

@@ -36,11 +36,13 @@
     "scores": {
       "$date": {
         ".read": true,
-        "$scoreId": {
-          ".write": true,
-          ".validate": "newData.hasChildren(['name', 'time'])"
-        },
-        ".indexOn": ["time"]
+        "$difficulty": {
+          "$scoreId": {
+            ".write": true,
+            ".validate": "newData.hasChildren(['name', 'time', 'difficulty'])"
+          },
+          ".indexOn": ["time"]
+        }
       }
     }
   }

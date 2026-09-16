@@ -5,6 +5,7 @@ let notesGrid = [];
 let selectedCell = null;
 let timerInterval = null;
 let startTime = null;
+let elapsedTime = 0;
 let hintsUsed = 0;
 let errorsCount = 0;
 let notesMode = false;
@@ -15,17 +16,38 @@ let originalGrid = [];
 let finalTime = 0;
 let database = null;
 let livesRemaining = 3;
+let isGameLost = false;
+let currentDifficulty = 'simple'; // 'simple', 'difficile' ou 'blitz'
+let isPaused = false;
+
+// Variables du mode Blitz
+const BLITZ_DURATION = 600; // 10 minutes en secondes
+let blitzTimeRemaining = BLITZ_DURATION;
+let blitzGridsCompleted = 0;
+
+// Configuration des niveaux de difficulté
+const DIFFICULTY_LEVELS = {
+    simple: { cellsToRemove: 43, label: 'Simple' },
+    difficile: { cellsToRemove: 54, label: 'Difficile' },
+    blitz: { cellsToRemove: 36, label: 'Blitz' }
+};
 
 // Détection navigateur
-const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
-const isEdge = /Edg/.test(navigator.userAgent);
-const isFirefox = /Firefox/.test(navigator.userAgent);
+const isEdge = /Edg\//.test(navigator.userAgent);
+const isFirefox = /Firefox\//.test(navigator.userAgent);
+// Safari contient "Safari" mais PAS "Chrome" ni "Edg" ni "Firefox" dans son UA
+const isSafari = /Safari\//.test(navigator.userAgent) && !/Chrome\//.test(navigator.userAgent) && !isEdge && !isFirefox;
+// Chrome contient "Chrome" mais PAS "Edg", et n'est pas Safari pur
+const isChrome = /Chrome\//.test(navigator.userAgent) && !isEdge && !isFirefox && !isSafari;
 
 if (isChrome) {
     document.body.classList.add('chrome-browser');
 }
 if (isEdge || isFirefox) {
     document.body.classList.add('edge-firefox-browser');
+}
+if (isSafari) {
+    document.body.classList.add('safari-browser');
 }
 
 // Initialisation
@@ -38,10 +60,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('leaderboard-modal').style.display = 'none';
     document.getElementById('gameover-modal').style.display = 'none';
     document.getElementById('seeYouTomorrow-modal').style.display = 'none';
+    document.getElementById('countdown-modal').style.display = 'none';
+    document.getElementById('blitz-result-modal').style.display = 'none';
+
+    // Charger le niveau sauvegardé ou démarrer en simple
+    const savedDifficulty = localStorage.getItem('current-difficulty');
+    if (savedDifficulty && Object.keys(DIFFICULTY_LEVELS).includes(savedDifficulty)) {
+        currentDifficulty = savedDifficulty;
+    }
     
-    // Vérifier si le sudoku du jour est déjà terminé
-    if (isTodayPuzzleCompleted()) {
-        blockCompletedPuzzle();
+    updateDifficultyButtons();
+    
+    // Vérifier si les deux niveaux sont terminés
+    if (areBothLevelsCompleted()) {
+        blockAllPuzzles();
+    } else if (isTodayPuzzleCompleted(currentDifficulty)) {
+        blockCurrentPuzzle();
     } else {
         initializeGame();
     }
@@ -94,24 +128,28 @@ function getTodayKey() {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 }
 
-// Vérifier si le puzzle du jour est déjà terminé
-function isTodayPuzzleCompleted() {
+// Vérifier si le puzzle du jour est déjà terminé pour un niveau spécifique
+function isTodayPuzzleCompleted(difficulty = currentDifficulty) {
     const todayKey = getTodayKey();
-    const completedDate = localStorage.getItem('sudoku-completed-date');
-    return completedDate === todayKey;
+    const completedDate = localStorage.getItem(`sudoku-completed-${difficulty}-${todayKey}`);
+    return completedDate === 'true';
 }
 
-// Marquer le puzzle du jour comme terminé
-function markTodayPuzzleCompleted() {
+// Marquer le puzzle du jour comme terminé pour un niveau spécifique
+function markTodayPuzzleCompleted(difficulty = currentDifficulty) {
     const todayKey = getTodayKey();
-    localStorage.setItem('sudoku-completed-date', todayKey);
+    localStorage.setItem(`sudoku-completed-${difficulty}-${todayKey}`, 'true');
 }
 
-// Bloquer le jeu si déjà terminé
-function blockCompletedPuzzle() {
-    // Afficher un message
+// Vérifier si tous les niveaux sont terminés
+function areBothLevelsCompleted() {
+    return isTodayPuzzleCompleted('simple') && isTodayPuzzleCompleted('difficile') && isTodayPuzzleCompleted('blitz');
+}
+
+// Bloquer tous les puzzles si tous les niveaux sont terminés
+function blockAllPuzzles() {
     const messageEl = document.getElementById('message');
-    messageEl.innerHTML = '🎉 <strong>Vous avez déjà terminé le Sudoku du jour !</strong><br>Revenez demain pour un nouveau défi ! 🚀';
+    messageEl.innerHTML = '🎉 <strong>Bravo ! Vous avez terminé tous les niveaux aujourd’hui !</strong><br>Revenez demain pour de nouveaux défis ! 🚀';
     messageEl.className = 'message success';
     messageEl.style.display = 'block';
     
@@ -119,6 +157,30 @@ function blockCompletedPuzzle() {
     document.querySelector('.sudoku-grid').style.display = 'none';
     document.querySelector('.number-pad').style.display = 'none';
     document.querySelectorAll('.controls').forEach(el => el.style.display = 'none');
+    document.querySelector('.difficulty-selector').style.display = 'none';
+}
+
+// Bloquer le niveau actuel mais permettre de changer de niveau
+function blockCurrentPuzzle() {
+    const messageEl = document.getElementById('message');
+    const levelName = DIFFICULTY_LEVELS[currentDifficulty].label;
+    messageEl.innerHTML = `🎉 <strong>Vous avez déjà terminé le niveau ${levelName} aujourd’hui !</strong><br>Essayez l'autre niveau ! 👆`;
+    messageEl.className = 'message success';
+    messageEl.style.display = 'block';
+    
+    // Masquer les contrôles de jeu mais garder le sélecteur de niveau
+    document.querySelector('.sudoku-grid').style.display = 'none';
+    document.querySelector('.number-pad').style.display = 'none';
+    document.querySelectorAll('.controls').forEach(el => el.style.display = 'none');
+}
+
+// Bloquer le jeu si déjà terminé (ancienne fonction, maintenant redirigée)
+function blockCompletedPuzzle() {
+    if (areBothLevelsCompleted()) {
+        blockAllPuzzles();
+    } else {
+        blockCurrentPuzzle();
+    }
 }
 
 // Générer un sudoku complet valide
@@ -265,9 +327,20 @@ function createPuzzle(completeGrid, seed, difficulty = 40) {
 
 // Initialiser le jeu
 function initializeGame() {
+    updateGameControlsVisibility();
+
+    if (currentDifficulty === 'blitz') {
+        initializeBlitzGame();
+        return;
+    }
+
     const seed = getTodaysSeed();
-    solutionGrid = generateCompleteSudoku(seed);
-    originalGrid = createPuzzle(solutionGrid, seed, 54);
+    // Utiliser une seed différente pour chaque niveau
+    const levelSeed = seed + (currentDifficulty === 'difficile' ? 10000 : 0);
+    const cellsToRemove = DIFFICULTY_LEVELS[currentDifficulty].cellsToRemove;
+    
+    solutionGrid = generateCompleteSudoku(levelSeed);
+    originalGrid = createPuzzle(solutionGrid, levelSeed, cellsToRemove);
     currentGrid = originalGrid.map(row => [...row]);
     notesGrid = Array(9).fill(null).map(() => Array(9).fill(null).map(() => new Set()));
     history = [];
@@ -276,13 +349,246 @@ function initializeGame() {
     gameCompleted = false;
     livesRemaining = 3;
     
+    // Afficher les contrôles de jeu
+    const gridElement = document.querySelector('.sudoku-grid');
+    gridElement.style.display = 'grid';
+    gridElement.classList.remove('paused');
+    document.querySelector('.number-pad').style.display = 'grid';
+    document.querySelectorAll('.controls').forEach(el => el.style.display = 'flex');
+    
     updateLivesDisplay();
     saveState();
     renderGrid();
     updateProgress();
     updateNumberButtons();
-    startTimer();
-    showMessage('Bonne chance ! 🍀', 'info');
+    
+    const levelName = DIFFICULTY_LEVELS[currentDifficulty].label;
+    showMessage(`Niveau ${levelName} - Bonne chance ! 🍀`, 'info');
+    
+    // Lancer le compte à rebours de 3 secondes avant de démarrer le timer
+    showCountdown();
+}
+
+// Afficher ou masquer les éléments spécifiques au mode Blitz
+function updateGameControlsVisibility() {
+    const blitzStats = document.getElementById('blitz-stats');
+    if (blitzStats) {
+        blitzStats.style.display = currentDifficulty === 'blitz' ? 'flex' : 'none';
+    }
+}
+
+// Initialiser une session Blitz (10 minutes, grilles enchaînées)
+function initializeBlitzGame() {
+    blitzGridsCompleted = 0;
+    blitzTimeRemaining = BLITZ_DURATION;
+    hintsUsed = 0;
+    errorsCount = 0;
+    gameCompleted = false;
+    isGameLost = false;
+
+    // Afficher les contrôles de jeu
+    const gridElement = document.querySelector('.sudoku-grid');
+    gridElement.style.display = 'grid';
+    gridElement.classList.remove('paused');
+    document.querySelector('.number-pad').style.display = 'grid';
+    document.querySelectorAll('.controls').forEach(el => el.style.display = 'flex');
+
+    updateBlitzStatsDisplay();
+    generateNewBlitzPuzzle();
+
+    showMessage('Mode Blitz ⚡ - Enchaînez un maximum de grilles en 10 minutes ! 3 erreurs = grille suivante.', 'info');
+
+    showCountdown();
+}
+
+// Générer une nouvelle grille aléatoire pour le mode Blitz
+function generateNewBlitzPuzzle() {
+    const seed = Date.now() + Math.floor(Math.random() * 1000000);
+    const cellsToRemove = DIFFICULTY_LEVELS.blitz.cellsToRemove;
+
+    solutionGrid = generateCompleteSudoku(seed);
+    originalGrid = createPuzzle(solutionGrid, seed, cellsToRemove);
+    currentGrid = originalGrid.map(row => [...row]);
+    notesGrid = Array(9).fill(null).map(() => Array(9).fill(null).map(() => new Set()));
+    history = [];
+    historyIndex = -1;
+    livesRemaining = 3;
+
+    updateLivesDisplay();
+    saveState();
+    renderGrid();
+    updateProgress();
+    updateNumberButtons();
+}
+
+// Passer à la grille suivante après 3 erreurs sur la grille en cours
+function skipBlitzPuzzle() {
+    showMessage('❌ 3 erreurs - Grille suivante !', 'error');
+    generateNewBlitzPuzzle();
+}
+
+// Démarrer le chronomètre compte à rebours du mode Blitz
+function startBlitzTimer() {
+    startTime = Date.now() - ((BLITZ_DURATION - blitzTimeRemaining) * 1000);
+    updateBlitzTimer();
+    timerInterval = setInterval(updateBlitzTimer, 1000);
+}
+
+// Mettre à jour l'affichage du chronomètre compte à rebours du mode Blitz
+function updateBlitzTimer() {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    blitzTimeRemaining = Math.max(0, BLITZ_DURATION - elapsed);
+    const minutes = Math.floor(blitzTimeRemaining / 60).toString().padStart(2, '0');
+    const seconds = (blitzTimeRemaining % 60).toString().padStart(2, '0');
+    document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+
+    if (blitzTimeRemaining <= 0) {
+        endBlitzSession();
+    }
+}
+
+// Mettre à jour le compteur de grilles complétées affiché
+function updateBlitzStatsDisplay() {
+    const el = document.getElementById('blitz-grids-count');
+    if (el) el.textContent = blitzGridsCompleted;
+}
+
+// Terminer la session Blitz (temps écoulé)
+function endBlitzSession() {
+    gameCompleted = true;
+    stopTimer();
+    markTodayPuzzleCompleted('blitz');
+
+    document.querySelectorAll('.number-btn, .erase-btn').forEach(btn => {
+        btn.disabled = true;
+    });
+    const notesBtn = document.getElementById('notes-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    if (notesBtn) notesBtn.disabled = true;
+    if (resetBtn) resetBtn.disabled = true;
+    if (pauseBtn) pauseBtn.disabled = true;
+
+    celebrateWin();
+    setTimeout(() => {
+        showBlitzResultModal();
+    }, 1200);
+}
+
+// Afficher le modal de résultat du mode Blitz
+function showBlitzResultModal() {
+    const leaderboardModal = document.getElementById('leaderboard-modal');
+    leaderboardModal.classList.remove('show');
+    leaderboardModal.style.display = 'none';
+
+    document.getElementById('blitz-final-count').textContent = blitzGridsCompleted;
+
+    const modal = document.getElementById('blitz-result-modal');
+    modal.style.display = 'flex';
+    modal.classList.add('show');
+    document.getElementById('blitz-player-name').focus();
+}
+
+// Fermer le modal de résultat du mode Blitz sans enregistrer de score
+function closeBlitzResultModal() {
+    const modal = document.getElementById('blitz-result-modal');
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+    document.getElementById('blitz-player-name').value = '';
+
+    showSeeYouTomorrowModal();
+}
+
+// Soumettre le score du mode Blitz (nombre de grilles complétées)
+async function submitBlitzScore() {
+    const rawName = document.getElementById('blitz-player-name').value;
+    const playerName = sanitizeName(rawName);
+
+    if (!playerName || playerName.length < 2) {
+        showMessage('Veuillez entrer un nom valide (2-10 caractères) !', 'error');
+        return;
+    }
+
+    if (!database) {
+        showMessage('⚠️ Configurez Firebase pour activer le classement (voir README.md)', 'info');
+        closeBlitzResultModal();
+        return;
+    }
+
+    try {
+        const today = getTodayKey();
+        const scoreData = {
+            name: playerName,
+            time: 0, // non pertinent en mode Blitz, conservé pour la validation Firebase
+            gridsCompleted: blitzGridsCompleted,
+            difficulty: 'blitz',
+            date: new Date().toISOString(),
+            timestamp: Date.now()
+        };
+
+        await database.ref(`scores/${today}/blitz`).push(scoreData);
+
+        const modal = document.getElementById('blitz-result-modal');
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        document.getElementById('blitz-player-name').value = '';
+
+        showMessage('🎉 Score enregistré avec succès !', 'success');
+
+        setTimeout(() => {
+            showSeeYouTomorrowModal();
+        }, 400);
+
+    } catch (error) {
+        console.error('Erreur lors de l\'enregistrement:', error);
+        showMessage('Erreur lors de l\'enregistrement du score', 'error');
+    }
+}
+
+// Afficher le compte à rebours de 3 secondes
+function showCountdown() {
+    const modal = document.getElementById('countdown-modal');
+    const numberElement = document.getElementById('countdown-number');
+    const countdownText = modal.querySelector('.countdown-text');
+    
+    modal.style.display = 'flex';
+    modal.classList.add('show');
+    
+    // Réinitialiser
+    numberElement.style.fontSize = '';
+    numberElement.textContent = '3';
+    countdownText.style.display = '';
+    
+    let count = 3;
+    
+    const triggerAnimation = () => {
+        numberElement.style.animation = 'none';
+        void numberElement.offsetWidth; // force reflow
+        numberElement.style.animation = 'countdownScale 0.9s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    };
+    
+    triggerAnimation();
+    
+    const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+            numberElement.textContent = count;
+            triggerAnimation();
+        } else {
+            numberElement.textContent = 'GO !';
+            numberElement.style.fontSize = '4.5em';
+            countdownText.style.display = 'none';
+            triggerAnimation();
+            
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+                startTimer();
+            }, 900);
+            
+            clearInterval(countdownInterval);
+        }
+    }, 1000);
 }
 
 // Afficher la grille
@@ -339,6 +645,7 @@ function isOriginalCell(row, col) {
 
 // Sélectionner une cellule
 function selectCell(cell) {
+    if (isPaused) return;
     if (selectedCell) {
         selectedCell.classList.remove('selected');
     }
@@ -455,8 +762,89 @@ function removeNotesInRelatedCells(row, col, num) {
     }
 }
 
+// Mettre à jour visuellement les cellules contenant des notes
+function updateNoteCellsDisplay() {
+    document.querySelectorAll('.cell').forEach(cell => {
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+        
+        // Si la cellule est vide et contient des notes, la mettre à jour
+        if (currentGrid[row][col] === 0 && notesGrid[row][col].size > 0) {
+            renderNotes(cell, row, col);
+        } else if (currentGrid[row][col] === 0 && notesGrid[row][col].size === 0 && cell.classList.contains('notes-active')) {
+            // Si la cellule n'a plus de notes, nettoyer l'affichage
+            cell.classList.remove('notes-active');
+            cell.innerHTML = '';
+        }
+    });
+}
+
+// Changer le niveau de difficulté
+function changeDifficulty(newDifficulty) {
+    if (newDifficulty === currentDifficulty) return;
+    
+    // Sauvegarder le choix
+    currentDifficulty = newDifficulty;
+    localStorage.setItem('current-difficulty', currentDifficulty);
+    
+    // Arrêter le timer actuel et réinitialiser le temps
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    elapsedTime = 0;
+
+    // Mettre à jour les boutons et la visibilité des éléments Blitz
+    updateDifficultyButtons();
+    updateGameControlsVisibility();
+    
+    // Vérifier si ce niveau est déjà terminé
+    if (isTodayPuzzleCompleted(currentDifficulty)) {
+        blockCurrentPuzzle();
+    } else {
+        // Réinitialiser et démarrer le nouveau niveau
+        document.getElementById('message').style.display = 'none';
+        initializeGame();
+    }
+}
+
+// Mettre à jour l'apparence des boutons de difficulté
+function updateDifficultyButtons() {
+    const buttonLabels = {
+        simple: 'Simple',
+        difficile: 'Difficile',
+        blitz: '⚡ Blitz'
+    };
+
+    const buttons = {
+        simple: document.getElementById('difficulty-simple'),
+        difficile: document.getElementById('difficulty-difficile'),
+        blitz: document.getElementById('difficulty-blitz')
+    };
+
+    Object.keys(buttons).forEach((key) => {
+        const btn = buttons[key];
+        if (!btn) return;
+
+        btn.classList.toggle('active', key === currentDifficulty);
+
+        if (isTodayPuzzleCompleted(key)) {
+            btn.classList.add('completed');
+            btn.innerHTML = `✓ ${DIFFICULTY_LEVELS[key].label}`;
+        } else {
+            btn.classList.remove('completed');
+            btn.innerHTML = buttonLabels[key];
+        }
+    });
+}
+
 // Configurer les écouteurs d'événements
 function setupEventListeners() {
+    // Boutons de changement de difficulté
+    document.getElementById('difficulty-simple')?.addEventListener('click', () => changeDifficulty('simple'));
+    document.getElementById('difficulty-difficile')?.addEventListener('click', () => changeDifficulty('difficile'));
+    document.getElementById('difficulty-blitz')?.addEventListener('click', () => changeDifficulty('blitz'));
+    
     document.addEventListener('keydown', (e) => {
         if (!selectedCell) return;
         
@@ -481,11 +869,9 @@ function setupEventListeners() {
         }
     });
     
-    document.getElementById('hint-btn').addEventListener('click', giveHint);
     document.getElementById('reset-btn').addEventListener('click', resetGame);
     document.getElementById('notes-btn').addEventListener('click', toggleNotesMode);
-    document.getElementById('undo-btn').addEventListener('click', undo);
-    document.getElementById('redo-btn').addEventListener('click', redo);
+    document.getElementById('pause-btn').addEventListener('click', togglePause);
     // document.getElementById('theme-btn').addEventListener('click', toggleTheme);
     document.getElementById('share-btn').addEventListener('click', shareScore);
     
@@ -502,21 +888,34 @@ function setupEventListeners() {
     });
     
     // Événements pour les modales
-    document.getElementById('view-leaderboard-btn').addEventListener('click', showLeaderboard);
+    document.getElementById('view-leaderboard-btn').addEventListener('click', () => showLeaderboard('simple'));
     document.getElementById('submit-score-btn').addEventListener('click', submitScore);
     document.getElementById('skip-score-btn').addEventListener('click', closeNameModal);
     document.getElementById('close-leaderboard').addEventListener('click', closeLeaderboard);
     document.getElementById('view-solution-btn').addEventListener('click', showSolution);
+    document.getElementById('submit-loss-score-btn').addEventListener('click', submitLossScore);
+    document.getElementById('skip-loss-score-btn').addEventListener('click', hideLossNameSection);
+    document.getElementById('loss-player-name').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submitLossScore();
+    });
     document.getElementById('view-final-leaderboard-btn').addEventListener('click', () => {
         closeSeeYouTomorrowModal();
         showLeaderboard();
     });
-    
+
+    // Événements pour la modale de résultat Blitz
+    document.getElementById('submit-blitz-score-btn')?.addEventListener('click', submitBlitzScore);
+    document.getElementById('skip-blitz-score-btn')?.addEventListener('click', closeBlitzResultModal);
+    document.getElementById('blitz-player-name')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submitBlitzScore();
+    });
+
     // Fermer les modales en cliquant à l'extérieur
     window.addEventListener('click', (e) => {
         const nameModal = document.getElementById('name-modal');
         const leaderboardModal = document.getElementById('leaderboard-modal');
         const gameoverModal = document.getElementById('gameover-modal');
+        const blitzResultModal = document.getElementById('blitz-result-modal');
         if (e.target === nameModal) {
             closeNameModal();
         }
@@ -526,6 +925,9 @@ function setupEventListeners() {
         if (e.target === gameoverModal) {
             // Ne pas permettre de fermer la modale game over
         }
+        if (e.target === blitzResultModal) {
+            closeBlitzResultModal();
+        }
         // Ne pas permettre de fermer la modale "À demain" en cliquant à l'extérieur
     });
 }
@@ -533,6 +935,7 @@ function setupEventListeners() {
 // Placer un nombre dans la cellule sélectionnée
 function placeNumber(num) {
     if (!selectedCell) return;
+    if (isPaused) return;
     
     const row = parseInt(selectedCell.dataset.row);
     const col = parseInt(selectedCell.dataset.col);
@@ -574,23 +977,32 @@ function placeNumber(num) {
                     currentGrid[row][col] = 0;
                 }, 500);
                 
-                // Vérifier si le joueur a perdu
+                // Vérifier si le joueur a perdu (ou, en mode Blitz, doit passer à la grille suivante)
                 if (livesRemaining <= 0) {
-                    gameOver();
+                    if (currentDifficulty === 'blitz') {
+                        setTimeout(() => skipBlitzPuzzle(), 550);
+                    } else {
+                        gameOver();
+                    }
                     return;
                 }
             } else {
                 // Si correct, garder le chiffre
                 currentGrid[row][col] = num;
                 notesGrid[row][col].clear();
-                selectedCell.textContent = num;
-                selectedCell.classList.add('user-input');
-                selectedCell.classList.remove('error', 'correct', 'notes-active');
-                selectedCell.innerHTML = '';
-                selectedCell.textContent = num;
                 
                 // Effacer automatiquement les notes correspondantes dans les cellules liées
                 removeNotesInRelatedCells(row, col, num);
+                
+                // Re-rendre la grille complète pour afficher tous les changements
+                renderGrid();
+                
+                // Re-sélectionner la cellule après le re-rendu
+                const cells = document.querySelectorAll('.cell');
+                selectedCell = cells[row * 9 + col];
+                if (selectedCell) {
+                    selectedCell.classList.add('selected');
+                }
             }
         }
     }
@@ -605,6 +1017,7 @@ function placeNumber(num) {
 // Navigation au clavier
 function navigateCell(direction) {
     if (!selectedCell) return;
+    if (isPaused) return;
     
     let row = parseInt(selectedCell.dataset.row);
     let col = parseInt(selectedCell.dataset.col);
@@ -622,6 +1035,7 @@ function navigateCell(direction) {
 
 // Basculer le mode notes
 function toggleNotesMode() {
+    if (isPaused) return;
     notesMode = !notesMode;
     const btn = document.getElementById('notes-btn');
     const grid = document.getElementById('sudoku-grid');
@@ -632,6 +1046,29 @@ function toggleNotesMode() {
         grid.classList.add('notes-mode');
     } else {
         grid.classList.remove('notes-mode');
+    }
+}
+
+// Basculer la pause
+function togglePause() {
+    if (gameCompleted) return;
+    
+    isPaused = !isPaused;
+    const btn = document.getElementById('pause-btn');
+    const grid = document.getElementById('sudoku-grid');
+    
+    if (isPaused) {
+        // Mettre en pause
+        stopTimer();
+        grid.classList.add('paused');
+        btn.innerHTML = '▶️ Reprendre';
+        btn.classList.add('active');
+    } else {
+        // Reprendre
+        startTimer();
+        grid.classList.remove('paused');
+        btn.innerHTML = '⏸️ Pause';
+        btn.classList.remove('active');
     }
 }
 
@@ -674,7 +1111,6 @@ function saveState() {
     });
     
     historyIndex++;
-    updateUndoRedoButtons();
 }
 
 // Annuler
@@ -687,7 +1123,6 @@ function undo() {
         renderGrid();
         updateProgress();
         updateNumberButtons();
-        updateUndoRedoButtons();
     }
 }
 
@@ -701,14 +1136,16 @@ function redo() {
         renderGrid();
         updateProgress();
         updateNumberButtons();
-        updateUndoRedoButtons();
     }
 }
 
 // Mettre à jour les boutons undo/redo
 function updateUndoRedoButtons() {
-    document.getElementById('undo-btn').disabled = historyIndex <= 0;
-    document.getElementById('redo-btn').disabled = historyIndex >= history.length - 1;
+    // Boutons supprimés - fonction conservée pour compatibilité
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+    if (undoBtn) undoBtn.disabled = historyIndex <= 0;
+    if (redoBtn) redoBtn.disabled = historyIndex >= history.length - 1;
 }
 
 // Mettre à jour la progression
@@ -760,9 +1197,11 @@ function giveHint() {
     
     hintsUsed++;
     
-    // Ajouter 30 secondes de pénalité au chronomètre
+    // Ajouter pénalité au chronomètre (1 minute pour difficile, 30 secondes pour simple)
+    const penaltyTime = currentDifficulty === 'difficile' ? 60000 : 30000; // 60s ou 30s en millisecondes
+    const penaltySeconds = currentDifficulty === 'difficile' ? 60 : 30;
     if (startTime) {
-        startTime -= 30000; // Soustraire 30 secondes en millisecondes
+        startTime -= penaltyTime;
     }
     
     // Animation rouge sur le timer
@@ -774,14 +1213,21 @@ function giveHint() {
     
     updateProgress();
     updateNumberButtons();
-    showMessage(`Indice donné ! (+30s de pénalité, ${hintsUsed} utilisés)`, 'info');
+    showMessage(`Indice donné ! (+${penaltySeconds}s de pénalité, ${hintsUsed} utilisés)`, 'info');
 }
 
 // Réinitialiser le jeu
 function resetGame() {
     if (confirm('Êtes-vous sûr de vouloir recommencer ?')) {
         stopTimer();
+        elapsedTime = 0;
         hintsUsed = 0;
+        isPaused = false;
+        const pauseBtn = document.getElementById('pause-btn');
+        if (pauseBtn) {
+            pauseBtn.innerHTML = '⏸️ Pause';
+            pauseBtn.classList.remove('active');
+        }
         document.getElementById('share-btn').style.display = 'none';
         initializeGame();
     }
@@ -789,12 +1235,18 @@ function resetGame() {
 
 // Chronomètre
 function startTimer() {
-    startTime = Date.now();
+    if (currentDifficulty === 'blitz') {
+        startBlitzTimer();
+        return;
+    }
+    // Reprendre depuis le temps écoulé précédent
+    startTime = Date.now() - (elapsedTime * 1000);
     timerInterval = setInterval(updateTimer, 1000);
 }
 
 function updateTimer() {
     const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    elapsedTime = elapsed;
     const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
     const seconds = (elapsed % 60).toString().padStart(2, '0');
     document.getElementById('timer').textContent = `${minutes}:${seconds}`;
@@ -802,6 +1254,10 @@ function updateTimer() {
 
 function stopTimer() {
     if (timerInterval) {
+        // Sauvegarder le temps écoulé avant d'arrêter
+        if (startTime) {
+            elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        }
         clearInterval(timerInterval);
         timerInterval = null;
     }
@@ -871,6 +1327,14 @@ function checkCompletion() {
     
     // Si la grille est complète et correcte, le joueur a gagné
     if (isComplete && isCorrect) {
+        if (currentDifficulty === 'blitz') {
+            blitzGridsCompleted++;
+            updateBlitzStatsDisplay();
+            showMessage(`✅ Grille terminée ! (${blitzGridsCompleted})`, 'success');
+            generateNewBlitzPuzzle();
+            return;
+        }
+
         gameCompleted = true;
         stopTimer();
         finalTime = Math.floor((Date.now() - startTime) / 1000);
@@ -882,17 +1346,18 @@ function checkCompletion() {
         document.querySelectorAll('.number-btn, .erase-btn').forEach(btn => {
             btn.disabled = true;
         });
-        document.getElementById('hint-btn').disabled = true;
-        document.getElementById('undo-btn').disabled = true;
-        document.getElementById('redo-btn').disabled = true;
-        document.getElementById('notes-btn').disabled = true;
-        document.getElementById('reset-btn').disabled = true;
+        const notesBtn = document.getElementById('notes-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        if (notesBtn) notesBtn.disabled = true;
+        if (resetBtn) resetBtn.disabled = true;
+        if (pauseBtn) pauseBtn.disabled = true;
         
         celebrateWin();
         setTimeout(() => {
             showNameModal();
         }, 1500);
-    } else if (isComplete && !isCorrect) {
+    } else if (isComplete && !isCorrect && currentDifficulty !== 'blitz') {
         // La grille est complète mais incorrecte - Game Over
         gameOver();
     }
@@ -901,6 +1366,7 @@ function checkCompletion() {
 // Game Over - le joueur a perdu toutes ses vies
 function gameOver() {
     gameCompleted = true;
+    isGameLost = true;
     stopTimer();
     
     // Marquer le puzzle comme perdu (impossible de le refaire)
@@ -912,16 +1378,63 @@ function gameOver() {
     });
     
     // Désactiver aussi les autres boutons
-    document.getElementById('hint-btn').disabled = true;
-    document.getElementById('undo-btn').disabled = true;
-    document.getElementById('redo-btn').disabled = true;
-    document.getElementById('notes-btn').disabled = true;
-    document.getElementById('reset-btn').disabled = true;
+    const notesBtn = document.getElementById('notes-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    if (notesBtn) notesBtn.disabled = true;
+    if (resetBtn) resetBtn.disabled = true;
+    if (pauseBtn) pauseBtn.disabled = true;
     
     // Afficher la modale Game Over
     const modal = document.getElementById('gameover-modal');
     modal.style.display = 'flex';
     modal.classList.add('show');
+}
+
+// Cacher la section de saisie du nom après une défaite
+function hideLossNameSection() {
+    const section = document.getElementById('loss-name-section');
+    if (section) section.style.display = 'none';
+}
+
+// Enregistrer le score d'un joueur ayant perdu
+async function submitLossScore() {
+    const rawName = document.getElementById('loss-player-name').value;
+    const playerName = sanitizeName(rawName);
+
+    if (!playerName || playerName.length < 2) {
+        showMessage('Veuillez entrer un nom valide (2-10 caractères) !', 'error');
+        return;
+    }
+
+    if (!database) {
+        showMessage('⚠️ Configurez Firebase pour activer le classement (voir README.md)', 'info');
+        hideLossNameSection();
+        return;
+    }
+
+    try {
+        const today = getTodayKey();
+        const scoreData = {
+            name: playerName,
+            time: 999999,
+            lost: true,
+            hints: hintsUsed,
+            errors: errorsCount,
+            difficulty: currentDifficulty,
+            date: new Date().toISOString(),
+            timestamp: Date.now()
+        };
+
+        await database.ref(`scores/${today}/${currentDifficulty}`).push(scoreData);
+
+        hideLossNameSection();
+        showMessage('✓ Vous apparaissez maintenant dans le classement !', 'success');
+
+    } catch (error) {
+        console.error('Erreur lors de l\'enregistrement:', error);
+        showMessage('Erreur lors de l\'enregistrement du score', 'error');
+    }
 }
 
 // Afficher la solution
@@ -1068,12 +1581,13 @@ async function submitScore() {
             time: finalTime,
             hints: hintsUsed,
             errors: errorsCount,
+            difficulty: currentDifficulty,
             date: new Date().toISOString(),
             timestamp: Date.now()
         };
         
-        // Sauvegarder le score dans Firebase
-        await database.ref(`scores/${today}`).push(scoreData);
+        // Sauvegarder le score dans Firebase avec le niveau
+        await database.ref(`scores/${today}/${currentDifficulty}`).push(scoreData);
         
         closeNameModal();
         showMessage('🎉 Score enregistré avec succès !', 'success');
@@ -1090,7 +1604,7 @@ async function submitScore() {
 }
 
 // Afficher le classement
-async function showLeaderboard() {
+async function showLeaderboard(selectedDifficulty = 'simple') {
     // S'assurer que le modal de nom est complètement fermé
     const nameModal = document.getElementById('name-modal');
     nameModal.classList.remove('show');
@@ -1101,10 +1615,43 @@ async function showLeaderboard() {
     const userRankDiv = document.getElementById('user-rank');
     
     modal.style.display = 'flex';
-    
     modal.classList.add('show');
+    
     leaderboardList.innerHTML = '<div class="loading">Chargement du classement...</div>';
     userRankDiv.innerHTML = '';
+    
+    // Créer les onglets de difficulté
+    const tabsHtml = `
+        <div class="leaderboard-tabs">
+            <button class="leaderboard-tab ${selectedDifficulty === 'simple' ? 'active' : ''}" data-difficulty="simple">
+                📊 Simple
+            </button>
+            <button class="leaderboard-tab ${selectedDifficulty === 'difficile' ? 'active' : ''}" data-difficulty="difficile">
+                🏆 Difficile
+            </button>
+            <button class="leaderboard-tab ${selectedDifficulty === 'blitz' ? 'active' : ''}" data-difficulty="blitz">
+                ⚡ Blitz
+            </button>
+        </div>
+    `;
+    
+    // Insérer les onglets avant la liste (si pas déjà fait)
+    if (!document.querySelector('.leaderboard-tabs')) {
+        leaderboardList.insertAdjacentHTML('beforebegin', tabsHtml);
+        
+        // Ajouter les événements sur les onglets
+        document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const difficulty = tab.dataset.difficulty;
+                showLeaderboard(difficulty);
+            });
+        });
+    } else {
+        // Mettre à jour l'onglet actif
+        document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.difficulty === selectedDifficulty);
+        });
+    }
     
     if (!database) {
         leaderboardList.innerHTML = '<div class="loading">⚠️ Le classement nécessite la configuration de Firebase.<br><br>Consultez le README.md pour les instructions.</div>';
@@ -1113,7 +1660,7 @@ async function showLeaderboard() {
     
     try {
         const today = getTodayKey();
-        const snapshot = await database.ref(`scores/${today}`).orderByChild('time').once('value');
+        const snapshot = await database.ref(`scores/${today}/${selectedDifficulty}`).orderByChild('time').once('value');
         
         const scores = [];
         snapshot.forEach((childSnapshot) => {
@@ -1124,51 +1671,85 @@ async function showLeaderboard() {
         });
         
         if (scores.length === 0) {
-            leaderboardList.innerHTML = '<div class="loading">Aucun score enregistré pour aujourd\'hui</div>';
+            const levelName = DIFFICULTY_LEVELS[selectedDifficulty].label;
+            leaderboardList.innerHTML = `<div class="loading">Aucun score enregistré pour le niveau ${levelName} aujourd'hui</div>`;
             return;
         }
         
-        // Trier par temps (déjà trié par Firebase, mais on s'assure)
-        scores.sort((a, b) => a.time - b.time);
-        
+        if (selectedDifficulty === 'blitz') {
+            // Trier par nombre de grilles complétées décroissant
+            scores.sort((a, b) => (b.gridsCompleted || 0) - (a.gridsCompleted || 0));
+        } else {
+            // Trier par temps : perdants à la fin, puis par ordre croissant de temps
+            scores.sort((a, b) => {
+                if (a.lost && !b.lost) return 1;
+                if (!a.lost && b.lost) return -1;
+                return a.time - b.time;
+            });
+        }
+
         // Construire le HTML du classement
         leaderboardList.innerHTML = '';
-        scores.forEach((score, index) => {
+        let winnerRank = 0;
+        scores.forEach((score) => {
             const item = document.createElement('div');
             item.className = 'leaderboard-item';
-            
-            if (index < 3) {
-                item.classList.add('top-3');
-            }
-            
-            const rank = index + 1;
-            const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
-            const minutes = Math.floor(score.time / 60).toString().padStart(2, '0');
-            const seconds = (score.time % 60).toString().padStart(2, '0');
+
             const date = new Date(score.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-            
+            let rankDisplay, timeDisplay;
+
+            if (selectedDifficulty === 'blitz') {
+                winnerRank++;
+                const medal = winnerRank === 1 ? '🥇' : winnerRank === 2 ? '🥈' : winnerRank === 3 ? '🥉' : '';
+                if (winnerRank <= 3) item.classList.add('top-3');
+                rankDisplay = `${medal} ${winnerRank}`;
+                const count = score.gridsCompleted || 0;
+                timeDisplay = `${count} grille${count > 1 ? 's' : ''}`;
+            } else if (score.lost) {
+                rankDisplay = '-';
+                timeDisplay = '<span class="lost-text">Perdu</span>';
+            } else {
+                winnerRank++;
+                const medal = winnerRank === 1 ? '🥇' : winnerRank === 2 ? '🥈' : winnerRank === 3 ? '🥉' : '';
+                if (winnerRank <= 3) item.classList.add('top-3');
+                rankDisplay = `${medal} ${winnerRank}`;
+                const minutes = Math.floor(score.time / 60).toString().padStart(2, '0');
+                const seconds = (score.time % 60).toString().padStart(2, '0');
+                timeDisplay = `${minutes}:${seconds}`;
+            }
+
             item.innerHTML = `
-                <div class="rank-col">${medal} ${rank}</div>
+                <div class="rank-col">${rankDisplay}</div>
                 <div class="name-col">${escapeHtml(score.name)}</div>
-                <div class="time-col">${minutes}:${seconds}</div>
+                <div class="time-col">${timeDisplay}</div>
                 <div class="date-col">${date}</div>
             `;
-            
+
             leaderboardList.appendChild(item);
         });
-        
+
         // Afficher le rang de l'utilisateur s'il a joué
-        if (gameCompleted && finalTime > 0) {
+        if (selectedDifficulty === 'blitz' && gameCompleted && currentDifficulty === 'blitz') {
+            const userPosition = scores.findIndex(s => (s.gridsCompleted || 0) <= blitzGridsCompleted) + 1;
+            const totalPlayers = scores.length;
+            if (userPosition > 0 && totalPlayers > 0) {
+                const percentile = Math.round((1 - (userPosition / totalPlayers)) * 100);
+                userRankDiv.innerHTML = `
+                    🎯 Vous êtes le/la ${userPosition}${getOrdinalSuffix(userPosition)} avec ${blitzGridsCompleted} grille${blitzGridsCompleted > 1 ? 's' : ''} !<br>
+                    Vous êtes dans le top ${100 - percentile}% des joueurs (${totalPlayers} joueurs aujourd'hui)
+                `;
+            }
+        } else if (selectedDifficulty !== 'blitz' && gameCompleted && finalTime > 0) {
             const userPosition = scores.findIndex(s => s.time >= finalTime) + 1;
             const totalPlayers = scores.length;
             const percentile = Math.round((1 - (userPosition / totalPlayers)) * 100);
-            
+
             userRankDiv.innerHTML = `
                 🎯 Vous êtes le/la ${userPosition}${getOrdinalSuffix(userPosition)} plus rapide !<br>
                 Vous êtes dans le top ${100 - percentile}% des joueurs (${totalPlayers} joueurs aujourd'hui)
             `;
         }
-        
+
     } catch (error) {
         console.error('Erreur lors du chargement du classement:', error);
         leaderboardList.innerHTML = '<div class="loading">Erreur lors du chargement du classement</div>';
@@ -1180,6 +1761,9 @@ function closeLeaderboard() {
     const modal = document.getElementById('leaderboard-modal');
     modal.classList.remove('show');
     modal.style.display = 'none';
+    // Supprimer les onglets pour qu'ils soient recréés proprement à la prochaine ouverture
+    const tabs = document.querySelector('.leaderboard-tabs');
+    if (tabs) tabs.remove();
 }
 
 // Obtenir le suffixe ordinal (er, ème)
