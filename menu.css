@@ -25,19 +25,12 @@ h1.menu-title {
     -webkit-text-fill-color: white;
     color: white;
     filter: none;
-    font-size: clamp(3.1em, 14vw, 4.9em);
+    font-size: clamp(3.6em, 17vw, 5.8em);
     font-weight: 900;
     letter-spacing: -0.02em;
     line-height: 1;
-    margin-bottom: 14px;
+    margin-bottom: 0;
     text-shadow: 0 4px 18px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.menu-subtitle {
-    color: rgba(255, 255, 255, 0.88);
-    font-size: 1.05em;
-    font-weight: 500;
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
 }
 
 .game-menu {
