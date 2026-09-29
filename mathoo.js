@@ -13,7 +13,6 @@ let timerInterval = null;
 let elapsedTime = 0;
 let finalResult = null;    // { finalValue, distance, perfect, time }
 let currentStreak = 0;
-let isPracticeMode = false; // manche rejouée pour s'entraîner, non comptée au classement
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
@@ -165,14 +164,13 @@ function initializeGame() {
     playIntroAnimation();
 }
 
-// Relance une manche avec un tirage aléatoire (pas celui du jour), pour
-// s'entraîner après avoir terminé — ne compte pas pour le classement ni la série.
-function startPracticeRound() {
+// Relance la grille du jour (même cible, mêmes nombres) — le résultat
+// compte normalement pour le classement, comme un premier essai.
+function restartMathoo() {
     closeResultModal();
-    isPracticeMode = true;
 
-    const randomSeed = Math.floor(Math.random() * 1000000000);
-    const puzzle = generateDailyPuzzle(randomSeed);
+    const seed = getTodaysSeed();
+    const puzzle = generateDailyPuzzle(seed);
 
     target = puzzle.target;
     tiles = puzzle.numbers.map(v => ({ id: nextTileId++, value: v, used: false, computed: false }));
@@ -202,7 +200,7 @@ function startPracticeRound() {
     renderTilesPlaceholder();
     playIntroAnimation();
 
-    showMessage('🔄 Mode entraînement : ce résultat ne sera pas enregistré.', 'info');
+    showMessage('🔄 Nouvelle tentative sur la grille du jour !', 'info');
 }
 
 function renderTargetPlaceholder() {
@@ -322,7 +320,7 @@ function setupEventListeners() {
     document.getElementById('close-leaderboard').addEventListener('click', closeLeaderboard);
     document.getElementById('submit-mathoo-score-btn').addEventListener('click', submitMathooScore);
     document.getElementById('skip-mathoo-score-btn').addEventListener('click', closeResultModal);
-    document.getElementById('replay-mathoo-btn').addEventListener('click', startPracticeRound);
+    document.getElementById('replay-mathoo-btn').addEventListener('click', restartMathoo);
     document.getElementById('share-mathoo-btn').addEventListener('click', shareMathooScore);
     document.getElementById('mathoo-player-name').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') submitMathooScore();
@@ -509,10 +507,8 @@ function endRound(finalValue) {
     const perfect = distance === 0;
     finalResult = { finalValue, distance, perfect, time: elapsedTime };
 
-    if (!isPracticeMode) {
-        markTodayCompleted();
-        updateStreakOnCompletion();
-    }
+    markTodayCompleted();
+    updateStreakOnCompletion();
 
     document.querySelectorAll('.mathoo-op-btn').forEach(b => b.disabled = true);
     document.getElementById('undo-btn').disabled = true;
@@ -583,9 +579,9 @@ function blockGame() {
         const replayBtn = document.createElement('button');
         replayBtn.id = 'replay-practice-btn';
         replayBtn.className = 'btn btn-warning';
-        replayBtn.textContent = '🔄 Rejouer pour s\'entraîner';
+        replayBtn.textContent = '🔄 Recommencer';
         replayBtn.style.marginTop = '10px';
-        replayBtn.addEventListener('click', startPracticeRound);
+        replayBtn.addEventListener('click', restartMathoo);
         messageEl.insertAdjacentElement('afterend', replayBtn);
     }
 }
@@ -630,10 +626,6 @@ function showResultModal() {
         textEl.textContent = `Vous avez obtenu ${finalResult.finalValue} (cible : ${target})`;
     }
 
-    if (isPracticeMode) {
-        textEl.textContent += ' (entraînement, non comptabilisé)';
-    }
-
     document.getElementById('result-distance').textContent = finalResult.perfect ? '0 🎯' : finalResult.distance;
     document.getElementById('result-time').textContent = formatTime(finalResult.time);
 
@@ -650,17 +642,10 @@ function showResultModal() {
         });
     }
 
-    const nameSection = document.querySelector('#mathoo-result-modal .name-input-container');
-    const submitBtn = document.getElementById('submit-mathoo-score-btn');
-    const shareBtn = document.getElementById('share-mathoo-btn');
-    nameSection.style.display = isPracticeMode ? 'none' : '';
-    submitBtn.style.display = isPracticeMode ? 'none' : '';
-    shareBtn.style.display = isPracticeMode ? 'none' : '';
-
     const modal = document.getElementById('mathoo-result-modal');
     modal.style.display = 'flex';
     modal.classList.add('show');
-    if (!isPracticeMode) document.getElementById('mathoo-player-name').focus();
+    document.getElementById('mathoo-player-name').focus();
 }
 
 function closeResultModal() {
@@ -671,8 +656,6 @@ function closeResultModal() {
 }
 
 async function submitMathooScore() {
-    if (isPracticeMode) return; // les manches d'entraînement ne sont jamais enregistrées
-
     const submitBtn = document.getElementById('submit-mathoo-score-btn');
     if (submitBtn.disabled) return;
 

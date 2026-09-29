@@ -33,6 +33,23 @@ h1.menu-title {
     text-shadow: 0 4px 18px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
+/* Le orange vif de .btn-leaderboard tranche mal sur le dégradé violet du
+   menu (il est pensé pour un fond blanc) : on le réhabille ici en verre
+   dépoli pour qu'il se fonde dans l'identité de la page d'accueil. */
+#view-leaderboard-btn {
+    background: rgba(255, 255, 255, 0.14);
+    color: white;
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+#view-leaderboard-btn:hover {
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+}
+
 .game-menu {
     display: flex;
     flex-direction: column;
