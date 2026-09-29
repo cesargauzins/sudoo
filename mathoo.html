@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathoo - Sudoo</title>
+    <link rel="icon" type="image/png" href="mathoo-icon.png">
+    <link rel="apple-touch-icon" href="mathoo-icon.png">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="mathoo.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="back-to-menu" title="Retour au menu">← Menu</a>
+            <h1>Mathoo</h1>
+            <button id="view-leaderboard-btn" class="btn btn-leaderboard">🏆 Voir le Classement</button>
+        </header>
+
+        <div class="game-controls-bar">
+            <div class="timer">
+                <span class="timer-label">⏱️</span>
+                <span id="timer">00:00</span>
+            </div>
+            <div class="stat-badge">
+                <span class="stat-badge-icon">🔥</span>
+                <span id="streak-count" class="stat-badge-value">0</span>
+            </div>
+        </div>
+
+        <div class="mathoo-target-wrapper">
+            <div class="mathoo-target-label">Cible à atteindre</div>
+            <div class="mathoo-target" id="mathoo-target">---</div>
+        </div>
+
+        <div class="mathoo-numbers" id="mathoo-numbers"></div>
+
+        <div class="mathoo-operators" id="mathoo-operators">
+            <button class="mathoo-op-btn" data-op="+" disabled>+</button>
+            <button class="mathoo-op-btn" data-op="-" disabled>−</button>
+            <button class="mathoo-op-btn" data-op="*" disabled>×</button>
+            <button class="mathoo-op-btn" data-op="/" disabled>÷</button>
+        </div>
+
+        <div class="mathoo-steps" id="mathoo-steps"></div>
+
+        <div class="controls">
+            <button id="undo-btn" class="btn btn-secondary">Annuler</button>
+            <button id="reset-btn" class="btn btn-danger">Recommencer</button>
+        </div>
+        <div class="controls">
+            <button id="validate-btn" class="btn btn-primary" disabled>✓ Valider mon résultat</button>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <!-- Modal résultat -->
+    <div id="mathoo-result-modal" class="modal">
+        <div class="modal-content mathoo-result-content">
+            <h2 id="mathoo-result-title">Résultat</h2>
+            <p id="mathoo-result-text">Voici votre calcul :</p>
+            <div class="time-display">
+                <span class="timer-label">🎯 Écart avec la cible :</span>
+                <span id="result-distance" class="final-time">0</span>
+            </div>
+            <div class="time-display">
+                <span class="timer-label">⏱️ Temps :</span>
+                <span id="result-time" class="final-time">00:00</span>
+            </div>
+            <div class="mathoo-result-steps" id="mathoo-result-steps"></div>
+            <div class="name-input-container">
+                <label for="mathoo-player-name">Entrez votre nom pour enregistrer votre score :</label>
+                <input type="text" id="mathoo-player-name" maxlength="10" placeholder="Votre nom" />
+            </div>
+            <button id="submit-mathoo-score-btn" class="btn btn-primary">📊 Enregistrer mon score</button>
+            <button id="share-mathoo-btn" class="btn btn-success">📤 Partager mon score</button>
+            <button id="skip-mathoo-score-btn" class="btn btn-secondary">Passer</button>
+        </div>
+    </div>
+
+    <!-- Modal classement -->
+    <div id="leaderboard-modal" class="modal">
+        <div class="modal-content leaderboard-content">
+            <span class="close-btn" id="close-leaderboard">&times;</span>
+            <h2>🏆 Classement Mondial - Mathoo</h2>
+            <div id="user-rank" class="user-rank"></div>
+            <div class="leaderboard-header">
+                <span class="rank-col">Rang</span>
+                <span class="name-col">Joueur</span>
+                <span class="time-col">Résultat</span>
+                <span class="date-col">Date</span>
+            </div>
+            <div id="leaderboard-list" class="leaderboard-list">
+                <div class="loading">Chargement...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="mathoo.js"></script>
+</body>
+</html>

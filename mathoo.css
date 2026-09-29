@@ -1,0 +1,277 @@
+/* ============================================
+   MATHOO.CSS — Le Compte est Bon (grille 3x3, cible 100-999)
+   Dépend de common.css (chargé avant ce fichier)
+   ============================================ */
+
+.stat-badge .stat-badge-icon {
+    font-size: 1.2em;
+}
+
+#streak-count {
+    color: #ff7043;
+}
+
+/* Cible à atteindre */
+.mathoo-target-wrapper {
+    text-align: center;
+    margin: 4px 0 12px;
+}
+
+.mathoo-target-label {
+    font-size: 0.75em;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+}
+
+.mathoo-target {
+    font-size: 3em;
+    font-weight: 900;
+    color: #667eea;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.mathoo-target.reached {
+    color: #43a047;
+    animation: mathooTargetPulse 0.6s ease;
+}
+
+@keyframes mathooTargetPulse {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+}
+
+/* Tuiles de nombres disponibles */
+.mathoo-numbers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: min(100%, 340px);
+    margin: 10px auto;
+}
+
+.mathoo-tile {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #eef0f5 100%);
+    border: 2px solid #e0e0e0;
+    border-radius: 14px;
+    font-size: 1.6em;
+    font-weight: 800;
+    color: #4a4a4a;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+    animation: mathooTileIn 0.3s ease;
+}
+
+@keyframes mathooTileIn {
+    from { transform: scale(0.4); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.mathoo-tile.spinning {
+    color: #9aa0ee;
+    background: linear-gradient(135deg, #eef0ff 0%, #e4e8ff 100%);
+    cursor: default;
+    animation: none;
+}
+
+.mathoo-tile.locked {
+    animation: lettroLockIn 0.35s ease;
+}
+
+@keyframes lettroLockIn {
+    0% { transform: scale(1.15); }
+    60% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+.mathoo-tile:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.mathoo-tile.selected {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+    transform: scale(1.06);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.35);
+}
+
+.mathoo-tile.computed {
+    border-color: #43a047;
+}
+
+.mathoo-tile.big-number {
+    font-size: 1.4em;
+}
+
+/* Opérateurs */
+.mathoo-operators {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 12px 0;
+}
+
+.mathoo-op-btn {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    border: 2px solid #ddd;
+    background: white;
+    font-size: 1.5em;
+    font-weight: 800;
+    color: #667eea;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+}
+
+.mathoo-op-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(102, 126, 234, 0.3);
+}
+
+.mathoo-op-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.mathoo-op-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.35);
+}
+
+/* Historique des étapes */
+.mathoo-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 36px;
+    max-height: 80px;
+    overflow-y: auto;
+    padding: 8px;
+    margin-bottom: 6px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.mathoo-steps:empty::before {
+    content: "Vos calculs apparaîtront ici…";
+    color: #aaa;
+    font-size: 0.85em;
+    font-style: italic;
+}
+
+.mathoo-step-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.82em;
+    font-weight: 700;
+    animation: lettroChipIn 0.25s ease;
+}
+
+@keyframes lettroChipIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+#validate-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Modale de résultat */
+.mathoo-result-content {
+    max-width: 480px;
+    text-align: center;
+}
+
+.mathoo-result-content h2 {
+    color: #667eea;
+}
+
+.mathoo-result-content h2.perfect {
+    color: #43a047;
+}
+
+.mathoo-result-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    max-height: 130px;
+    overflow-y: auto;
+    padding: 10px;
+    margin: 10px 0 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+#submit-mathoo-score-btn {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+#skip-mathoo-score-btn {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+#share-mathoo-btn {
+    width: 100%;
+}
+
+@media screen and (max-width: 480px) {
+    .mathoo-target {
+        font-size: 2.4em;
+    }
+
+    .mathoo-tile {
+        font-size: 1.3em;
+        border-radius: 11px;
+    }
+
+    .mathoo-op-btn {
+        width: 46px;
+        height: 46px;
+        font-size: 1.3em;
+    }
+}
+
+@media screen and (max-height: 720px) {
+    .mathoo-numbers {
+        gap: 6px !important;
+        margin: 6px auto !important;
+    }
+    .mathoo-tile {
+        font-size: 1.3em !important;
+    }
+    .mathoo-target {
+        font-size: 2.2em !important;
+    }
+    .mathoo-op-btn {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 1.2em !important;
+    }
+}

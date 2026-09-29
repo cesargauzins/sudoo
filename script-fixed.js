@@ -923,7 +923,7 @@ function setupEventListeners() {
     document.getElementById('close-leaderboard').addEventListener('click', closeLeaderboard);
     document.getElementById('view-solution-btn').addEventListener('click', showSolution);
     document.getElementById('submit-loss-score-btn').addEventListener('click', submitLossScore);
-    document.getElementById('skip-loss-score-btn').addEventListener('click', hideLossNameSection);
+    document.getElementById('skip-loss-score-btn').addEventListener('click', closeGameOverModal);
     document.getElementById('loss-player-name').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') submitLossScore();
     });
@@ -1413,17 +1413,27 @@ function gameOver() {
     if (notesBtn) notesBtn.disabled = true;
     if (resetBtn) resetBtn.disabled = true;
     if (pauseBtn) pauseBtn.disabled = true;
-    
+
+    // Réinitialiser les boutons de la modale (au cas où ils seraient restés
+    // désactivés après une défaite précédente sur un autre niveau)
+    const submitLossBtn = document.getElementById('submit-loss-score-btn');
+    const skipLossBtn = document.getElementById('skip-loss-score-btn');
+    if (submitLossBtn) submitLossBtn.disabled = false;
+    if (skipLossBtn) skipLossBtn.disabled = false;
+    document.getElementById('loss-player-name').value = '';
+
     // Afficher la modale Game Over
     const modal = document.getElementById('gameover-modal');
     modal.style.display = 'flex';
     modal.classList.add('show');
 }
 
-// Cacher la section de saisie du nom après une défaite
-function hideLossNameSection() {
-    const section = document.getElementById('loss-name-section');
-    if (section) section.style.display = 'none';
+// Fermer entièrement la modale Game Over (sinon elle reste ouverte et bloque
+// tous les clics ailleurs sur la page, y compris le changement de difficulté)
+function closeGameOverModal() {
+    const modal = document.getElementById('gameover-modal');
+    modal.classList.remove('show');
+    modal.style.display = 'none';
 }
 
 // Enregistrer le score d'un joueur ayant perdu
@@ -1441,7 +1451,7 @@ async function submitLossScore() {
 
     if (!database) {
         showMessage('⚠️ Configurez Firebase pour activer le classement (voir README.md)', 'info');
-        hideLossNameSection();
+        closeGameOverModal();
         return;
     }
 
@@ -1464,7 +1474,7 @@ async function submitLossScore() {
 
         await database.ref(`scores/${today}/${currentDifficulty}`).push(scoreData);
 
-        hideLossNameSection();
+        closeGameOverModal();
         showMessage('✓ Vous apparaissez maintenant dans le classement !', 'success');
 
         setTimeout(() => {
