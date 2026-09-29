@@ -6,14 +6,15 @@
     <title>Sudoo - Jeux du jour</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="stylesheet" href="common.css">
-    <link rel="stylesheet" href="menu.css">
+    <link rel="stylesheet" href="common.css?v=20260929c">
+    <link rel="stylesheet" href="menu.css?v=20260929c">
 </head>
 <body>
     <div class="menu-page">
         <header>
             <h1 class="menu-title">Sudoo</h1>
             <p class="menu-subtitle">Choisis ton défi du jour</p>
+            <button id="view-leaderboard-btn" class="btn btn-leaderboard">🏆 Classement</button>
         </header>
 
         <div class="game-menu">
@@ -52,5 +53,37 @@
             <p>🏆 Un classement mondial différent pour chaque jeu, chaque jour</p>
         </div>
     </div>
+
+    <!-- Modal classement -->
+    <div id="leaderboard-modal" class="modal">
+        <div class="modal-content leaderboard-content">
+            <span class="close-btn" id="close-leaderboard">&times;</span>
+            <h2>🏆 Classement Mondial</h2>
+            <div class="leaderboard-tabs" id="game-tabs">
+                <button class="leaderboard-tab active" data-game="sudoku">🔢 Sudoku</button>
+                <button class="leaderboard-tab" data-game="lettro">🔤 Lettro</button>
+                <button class="leaderboard-tab" data-game="mathoo">🧮 Mathoo</button>
+            </div>
+            <div class="leaderboard-tabs" id="sudoku-sub-tabs">
+                <button class="leaderboard-tab active" data-difficulty="simple">📊 Simple</button>
+                <button class="leaderboard-tab" data-difficulty="difficile">🏆 Difficile</button>
+                <button class="leaderboard-tab" data-difficulty="blitz">⚡ Blitz</button>
+            </div>
+            <div class="leaderboard-header">
+                <span class="rank-col">Rang</span>
+                <span class="name-col">Joueur</span>
+                <span class="time-col" id="leaderboard-result-label">Temps</span>
+                <span class="date-col">Date</span>
+            </div>
+            <div id="leaderboard-list" class="leaderboard-list">
+                <div class="loading">Chargement...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="menu.js"></script>
 </body>
 </html>

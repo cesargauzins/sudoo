@@ -166,6 +166,17 @@ h1 {
     transform: none;
 }
 
+.btn-warning {
+    background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+    color: white;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, #fb8c00 0%, #f57c00 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(251, 140, 0, 0.3);
+}
+
 .btn-leaderboard {
     background: #ffa726;
     color: white;
