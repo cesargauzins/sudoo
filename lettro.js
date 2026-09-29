@@ -444,6 +444,9 @@ function closeResultModal() {
 }
 
 async function submitLettroScore() {
+    const submitBtn = document.getElementById('submit-lettro-score-btn');
+    if (submitBtn.disabled) return; // envoi déjà en cours, ignorer les clics répétés
+
     const rawName = document.getElementById('lettro-player-name').value;
     const playerName = sanitizeName(rawName);
 
@@ -457,6 +460,8 @@ async function submitLettroScore() {
         closeResultModal();
         return;
     }
+
+    submitBtn.disabled = true;
 
     try {
         const today = getTodayKey();
@@ -478,6 +483,7 @@ async function submitLettroScore() {
     } catch (error) {
         console.error('Erreur lors de l\'enregistrement:', error);
         showMessage('Erreur lors de l\'enregistrement du score', 'error');
+        submitBtn.disabled = false;
     }
 }
 

@@ -507,6 +507,9 @@ function closeBlitzResultModal() {
 
 // Soumettre le score du mode Blitz (nombre de grilles complétées)
 async function submitBlitzScore() {
+    const submitBtn = document.getElementById('submit-blitz-score-btn');
+    if (submitBtn.disabled) return; // envoi déjà en cours, ignorer les clics répétés
+
     const rawName = document.getElementById('blitz-player-name').value;
     const playerName = sanitizeName(rawName);
 
@@ -520,6 +523,8 @@ async function submitBlitzScore() {
         closeBlitzResultModal();
         return;
     }
+
+    submitBtn.disabled = true;
 
     try {
         const today = getTodayKey();
@@ -548,6 +553,7 @@ async function submitBlitzScore() {
     } catch (error) {
         console.error('Erreur lors de l\'enregistrement:', error);
         showMessage('Erreur lors de l\'enregistrement du score', 'error');
+        submitBtn.disabled = false;
     }
 }
 
@@ -1422,6 +1428,9 @@ function hideLossNameSection() {
 
 // Enregistrer le score d'un joueur ayant perdu
 async function submitLossScore() {
+    const submitBtn = document.getElementById('submit-loss-score-btn');
+    if (submitBtn.disabled) return; // envoi déjà en cours, ignorer les clics répétés
+
     const rawName = document.getElementById('loss-player-name').value;
     const playerName = sanitizeName(rawName);
 
@@ -1435,6 +1444,10 @@ async function submitLossScore() {
         hideLossNameSection();
         return;
     }
+
+    submitBtn.disabled = true;
+    const skipBtn = document.getElementById('skip-loss-score-btn');
+    if (skipBtn) skipBtn.disabled = true;
 
     try {
         const today = getTodayKey();
@@ -1454,9 +1467,15 @@ async function submitLossScore() {
         hideLossNameSection();
         showMessage('✓ Vous apparaissez maintenant dans le classement !', 'success');
 
+        setTimeout(() => {
+            showLeaderboard(currentDifficulty);
+        }, 500);
+
     } catch (error) {
         console.error('Erreur lors de l\'enregistrement:', error);
         showMessage('Erreur lors de l\'enregistrement du score', 'error');
+        submitBtn.disabled = false;
+        if (skipBtn) skipBtn.disabled = false;
     }
 }
 
@@ -1583,20 +1602,25 @@ function closeNameModal() {
 
 // Soumettre le score
 async function submitScore() {
+    const submitBtn = document.getElementById('submit-score-btn');
+    if (submitBtn.disabled) return; // envoi déjà en cours, ignorer les clics répétés
+
     const rawName = document.getElementById('player-name').value;
     const playerName = sanitizeName(rawName);
-    
+
     if (!playerName || playerName.length < 2) {
         showMessage('Veuillez entrer un nom valide (2-10 caractères) !', 'error');
         return;
     }
-    
+
     if (!database) {
         showMessage('⚠️ Configurez Firebase pour activer le classement (voir README.md)', 'info');
         closeNameModal();
         return;
     }
-    
+
+    submitBtn.disabled = true;
+
     try {
         const today = getTodayKey();
         const scoreData = {
@@ -1608,10 +1632,10 @@ async function submitScore() {
             date: new Date().toISOString(),
             timestamp: Date.now()
         };
-        
+
         // Sauvegarder le score dans Firebase avec le niveau
         await database.ref(`scores/${today}/${currentDifficulty}`).push(scoreData);
-        
+
         closeNameModal();
         showMessage('🎉 Score enregistré avec succès !', 'success');
         
@@ -1623,6 +1647,7 @@ async function submitScore() {
     } catch (error) {
         console.error('Erreur lors de l\'enregistrement:', error);
         showMessage('Erreur lors de l\'enregistrement du score', 'error');
+        submitBtn.disabled = false;
     }
 }
 
