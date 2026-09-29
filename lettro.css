@@ -10,18 +10,18 @@
 /* Conteneur positionné pour superposer le flash "GO !" au centre de la grille */
 .lettro-grid-wrapper {
     position: relative;
-    width: min(100%, 320px);
+    width: min(100%, 400px);
     margin: 10px auto;
 }
 
-/* Grille de lettres 3x3 */
+/* Grille de lettres 4 colonnes x 3 lignes */
 .lettro-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(3, 1fr);
     gap: 8px;
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 4 / 3;
 }
 
 .lettro-cell {
@@ -264,7 +264,7 @@
 
 @media screen and (max-height: 720px) {
     .lettro-grid-wrapper {
-        width: min(100%, 240px) !important;
+        width: min(100%, 300px) !important;
         margin: 6px auto !important;
     }
     .lettro-grid {

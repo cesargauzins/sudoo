@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deminoo - Sudoo</title>
+    <link rel="icon" type="image/png" href="deminoo-icon.png">
+    <link rel="apple-touch-icon" href="deminoo-icon.png">
+    <link rel="stylesheet" href="common.css?v=20260930a">
+    <link rel="stylesheet" href="deminoo.css?v=20260930e">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="back-to-menu" title="Retour au menu">← Menu</a>
+            <h1>Deminoo</h1>
+            <button id="view-leaderboard-btn" class="btn btn-leaderboard">🏆 Voir le Classement</button>
+        </header>
+
+        <div class="game-controls-bar">
+            <div class="timer">
+                <span class="timer-label">⏱️</span>
+                <span id="timer">00:00</span>
+            </div>
+            <div class="stat-badge">
+                <span class="stat-badge-icon">💣</span>
+                <span id="mines-left" class="stat-badge-value">22</span>
+            </div>
+        </div>
+
+        <div class="deminoo-grid" id="deminoo-grid"></div>
+
+        <div class="controls">
+            <button id="flag-toggle-btn" class="btn btn-notes deminoo-flag-toggle" title="Activer/Désactiver le mode drapeau">🚩 Drapeau</button>
+            <button id="reset-btn" class="btn btn-danger">Recommencer</button>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <!-- Modal résultat -->
+    <div id="deminoo-result-modal" class="modal">
+        <div class="modal-content deminoo-result-content">
+            <h2 id="deminoo-result-title">Résultat</h2>
+            <p id="deminoo-result-text">Voici votre partie :</p>
+            <div class="time-display">
+                <span class="timer-label">⏱️ Temps :</span>
+                <span id="result-time" class="final-time">00:00</span>
+            </div>
+            <div class="name-input-container">
+                <label for="deminoo-player-name">Entrez votre nom pour enregistrer votre score :</label>
+                <input type="text" id="deminoo-player-name" maxlength="10" placeholder="Votre nom" />
+            </div>
+            <button id="submit-deminoo-score-btn" class="btn btn-primary">📊 Enregistrer mon score</button>
+            <button id="replay-early-deminoo-btn" class="btn btn-warning" style="display:none;">🔄 Rejouer (mine trouvée tôt)</button>
+            <button id="skip-deminoo-score-btn" class="btn btn-secondary">Passer</button>
+        </div>
+    </div>
+
+    <!-- Modal classement -->
+    <div id="leaderboard-modal" class="modal">
+        <div class="modal-content leaderboard-content">
+            <span class="close-btn" id="close-leaderboard">&times;</span>
+            <h2>🏆 Classement Mondial - Deminoo</h2>
+            <div id="user-rank" class="user-rank"></div>
+            <div class="leaderboard-header">
+                <span class="rank-col">Rang</span>
+                <span class="name-col">Joueur</span>
+                <span class="time-col">Temps</span>
+                <span class="date-col">Date</span>
+            </div>
+            <div id="leaderboard-list" class="leaderboard-list">
+                <div class="loading">Chargement...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="deminoo.js?v=20260930e"></script>
+</body>
+</html>

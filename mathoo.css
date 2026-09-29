@@ -59,13 +59,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #f8f9fa 0%, #eef0f5 100%);
-    border: 2px solid #c3c9e8;
+    background: linear-gradient(135deg, #ffffff 0%, #f4f5ff 100%);
+    border: 2px solid #667eea;
     border-radius: 14px;
     font-size: 1.6em;
     font-weight: 800;
-    color: #2d3250;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    color: #667eea;
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.25);
     cursor: pointer;
     user-select: none;
     transition: all 0.2s ease;
@@ -228,7 +228,6 @@
 }
 
 #submit-mathoo-score-btn,
-#share-mathoo-btn,
 #replay-mathoo-btn {
     width: 100%;
     margin-bottom: 10px;

@@ -1,6 +1,8 @@
-// Lettro — grille de 9 lettres, 3 minutes, un maximum de mots français.
+// Lettro — grille de 12 lettres (4x3), 5 minutes, un maximum de mots français.
 
-const ROUND_DURATION = 180; // secondes
+const ROUND_DURATION = 300; // secondes
+const GRID_LETTER_COUNT = 12;
+const MIN_VOWELS = 4;
 
 let database = null;
 let grid = [];                 // 9 lettres de la grille du jour
@@ -86,17 +88,17 @@ const VOWELS = new Set(['A', 'E', 'I', 'O', 'U', 'Y']);
 
 function generateDailyGrid(seed) {
     const letters = [];
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < GRID_LETTER_COUNT; i++) {
         const idx = Math.floor(seededRandom(seed + i) * LETTER_POOL.length);
         letters.push(LETTER_POOL[idx]);
     }
 
-    // Filet de sécurité : garantir au moins 3 voyelles pour que la grille soit jouable
+    // Filet de sécurité : garantir un minimum de voyelles pour que la grille soit jouable
     const vowelPool = ['A', 'E', 'I', 'O', 'U'];
     let vowelCount = letters.filter(l => VOWELS.has(l)).length;
     let attempt = 0;
-    while (vowelCount < 3 && attempt < 30) {
-        const replaceIdx = Math.floor(seededRandom(seed + 200 + attempt) * 9);
+    while (vowelCount < MIN_VOWELS && attempt < 30) {
+        const replaceIdx = Math.floor(seededRandom(seed + 200 + attempt) * GRID_LETTER_COUNT);
         if (!VOWELS.has(letters[replaceIdx])) {
             const vowelIdx = Math.floor(seededRandom(seed + 300 + attempt) * vowelPool.length);
             letters[replaceIdx] = vowelPool[vowelIdx];
@@ -141,7 +143,7 @@ function initializeGame() {
 function renderGridCells() {
     const gridEl = document.getElementById('lettro-grid');
     gridEl.innerHTML = '';
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < GRID_LETTER_COUNT; i++) {
         const cell = document.createElement('div');
         cell.className = 'lettro-cell spinning';
         cell.dataset.index = i;
@@ -297,7 +299,23 @@ function submitWord() {
         return;
     }
 
+    if (isLikelyPlural(normalized)) {
+        rejectWord('Pluriel non autorisé');
+        return;
+    }
+
     acceptWord(normalized);
+}
+
+// Rejette les pluriels réguliers (mot en -s ou -x dont la forme sans cette
+// dernière lettre est elle-même un mot valide) : trouver "chats" en plus de
+// "chat" n'apporte rien, ce n'est pas considéré comme un vrai mot différent.
+function isLikelyPlural(word) {
+    if (word.length < 3) return false;
+    const lastChar = word[word.length - 1];
+    if (lastChar !== 's' && lastChar !== 'x') return false;
+    const base = word.slice(0, -1);
+    return base.length >= 2 && FRENCH_WORDS_SET.has(base);
 }
 
 function canFormFromGrid(word) {

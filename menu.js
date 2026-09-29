@@ -102,6 +102,7 @@ async function loadLeaderboard() {
         } else if (currentGame === 'mathoo') {
             renderMathooScores(scores, listEl);
         } else {
+            // 'sudoku' et 'deminoo' partagent le même format (temps + perdu)
             renderSudokuScores(scores, listEl);
         }
     } catch (error) {

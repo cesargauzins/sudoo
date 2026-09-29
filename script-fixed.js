@@ -902,8 +902,7 @@ function setupEventListeners() {
     document.getElementById('notes-btn').addEventListener('click', toggleNotesMode);
     document.getElementById('pause-btn').addEventListener('click', togglePause);
     // document.getElementById('theme-btn').addEventListener('click', toggleTheme);
-    document.getElementById('share-btn').addEventListener('click', shareScore);
-    
+
     // Événements pour le clavier numérique
     document.querySelectorAll('.number-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1257,7 +1256,6 @@ function resetGame() {
             pauseBtn.innerHTML = '⏸️ Pause';
             pauseBtn.classList.remove('active');
         }
-        document.getElementById('share-btn').style.display = 'none';
         initializeGame();
     }
 }
@@ -1553,35 +1551,6 @@ function createConfetti() {
 }
 
 // Partager le score
-function shareScore() {
-    const time = document.getElementById('timer').textContent;
-    const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-    
-    const text = `🎯 Sudoku du ${today}\n⏱️ Temps: ${time}\n💡 Indices: ${hintsUsed}\n❌ Erreurs: ${errorsCount}\n\n✅ Résolu avec succès !`;
-    
-    if (navigator.share) {
-        navigator.share({
-            title: 'Mon score Sudoku',
-            text: text
-        }).catch(() => {
-            copyToClipboard(text);
-        });
-    } else {
-        copyToClipboard(text);
-    }
-}
-
-// Copier dans le presse-papier
-function copyToClipboard(text) {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
-    showMessage('📋 Score copié dans le presse-papier !', 'success');
-}
-
 // Afficher le modal de saisie du nom
 function showNameModal() {
     // S'assurer que le modal de classement est complètement fermé

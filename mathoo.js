@@ -321,7 +321,6 @@ function setupEventListeners() {
     document.getElementById('submit-mathoo-score-btn').addEventListener('click', submitMathooScore);
     document.getElementById('skip-mathoo-score-btn').addEventListener('click', closeResultModal);
     document.getElementById('replay-mathoo-btn').addEventListener('click', restartMathoo);
-    document.getElementById('share-mathoo-btn').addEventListener('click', shareMathooScore);
     document.getElementById('mathoo-player-name').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') submitMathooScore();
     });
@@ -699,30 +698,6 @@ async function submitMathooScore() {
         showMessage('Erreur lors de l\'enregistrement du score', 'error');
         submitBtn.disabled = false;
     }
-}
-
-function shareMathooScore() {
-    const todayStr = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-    const resultLine = finalResult.perfect
-        ? `Le compte est bon ! 🎉 (${target})`
-        : `${finalResult.finalValue} — écart de ${finalResult.distance} avec ${target}`;
-    const text = `🧮 Mathoo du ${todayStr}\n🎯 Cible : ${target}\n${resultLine}\n⏱️ ${formatTime(finalResult.time)}\n🔥 Série : ${currentStreak} jour${currentStreak > 1 ? 's' : ''}`;
-
-    if (navigator.share) {
-        navigator.share({ title: 'Mon score Mathoo', text }).catch(() => copyToClipboard(text));
-    } else {
-        copyToClipboard(text);
-    }
-}
-
-function copyToClipboard(text) {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
-    showMessage('📋 Score copié dans le presse-papier !', 'success');
 }
 
 // ---------- Classement ----------

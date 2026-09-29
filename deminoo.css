@@ -1,0 +1,129 @@
+/* ============================================
+   DEMINOO.CSS — Démineur quotidien (grille 9x9, 10 mines)
+   Dépend de common.css (chargé avant ce fichier)
+   ============================================ */
+
+.stat-badge .stat-badge-icon {
+    font-size: 1.2em;
+}
+
+#mines-left {
+    color: #ef5350;
+}
+
+.deminoo-grid {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    grid-template-rows: repeat(11, 1fr);
+    gap: 2px;
+    width: min(100%, 400px);
+    aspect-ratio: 1 / 1;
+    margin: 10px auto;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 5px;
+    box-sizing: border-box;
+    box-shadow: 0 8px 22px rgba(102, 126, 234, 0.35);
+}
+
+.deminoo-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #eef0f5 100%);
+    border-radius: 4px;
+    font-size: 1em;
+    font-weight: 800;
+    color: #333;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease, transform 0.1s ease;
+    animation: deminooCellIn 0.35s ease backwards;
+}
+
+@keyframes deminooCellIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.deminoo-cell:hover {
+    background: linear-gradient(135deg, #eef0ff 0%, #e4e8ff 100%);
+}
+
+.deminoo-cell.revealed {
+    background: #ffffff;
+    cursor: default;
+    box-shadow: inset 0 0 0 1px #e0e0e0;
+}
+
+.deminoo-cell.revealed:hover {
+    background: #ffffff;
+}
+
+.deminoo-cell.flagged {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+}
+
+.deminoo-cell.mine {
+    background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%);
+}
+
+.deminoo-cell.mine.exploded {
+    background: linear-gradient(135deg, #ef5350 0%, #d32f2f 100%);
+}
+
+.deminoo-cell.n1 { color: #2565e8; }
+.deminoo-cell.n2 { color: #388e3c; }
+.deminoo-cell.n3 { color: #e53935; }
+.deminoo-cell.n4 { color: #5e35b1; }
+.deminoo-cell.n5 { color: #8d4e2a; }
+.deminoo-cell.n6 { color: #00897b; }
+.deminoo-cell.n7 { color: #333333; }
+.deminoo-cell.n8 { color: #757575; }
+
+.deminoo-flag-toggle {
+    margin-bottom: 8px;
+}
+
+.deminoo-flag-toggle.active {
+    background: #8e24aa;
+    box-shadow: 0 0 15px rgba(171, 71, 188, 0.6);
+}
+
+/* Modale de résultat */
+.deminoo-result-content {
+    max-width: 460px;
+    text-align: center;
+}
+
+.deminoo-result-content h2.perfect {
+    color: #43a047;
+}
+
+.deminoo-result-content h2.lost {
+    color: #ef5350;
+}
+
+#submit-deminoo-score-btn,
+#replay-early-deminoo-btn {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+#skip-deminoo-score-btn {
+    width: 100%;
+}
+
+@media screen and (max-width: 480px) {
+    .deminoo-cell {
+        font-size: 0.8em;
+        border-radius: 3px;
+    }
+}
+
+@media screen and (max-height: 720px) {
+    .deminoo-grid {
+        width: min(100%, 320px) !important;
+        margin: 6px auto !important;
+    }
+}
