@@ -19,6 +19,8 @@ let livesRemaining = 3;
 let isGameLost = false;
 let currentDifficulty = 'simple'; // 'simple', 'difficile' ou 'blitz'
 let isPaused = false;
+let countdownInterval = null;
+let countdownGoTimeout = null;
 
 // Variables du mode Blitz
 const BLITZ_DURATION = 600; // 10 minutes en secondes
@@ -547,29 +549,45 @@ async function submitBlitzScore() {
 
 // Afficher le compte à rebours de 3 secondes
 function showCountdown() {
+    // Annuler tout compte à rebours (et démarrage de timer) précédent encore en cours,
+    // pour éviter que deux chronomètres tournent en parallèle si l'utilisateur change
+    // de difficulté avant la fin du compte à rebours précédent.
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    if (countdownGoTimeout) {
+        clearTimeout(countdownGoTimeout);
+        countdownGoTimeout = null;
+    }
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+
     const modal = document.getElementById('countdown-modal');
     const numberElement = document.getElementById('countdown-number');
     const countdownText = modal.querySelector('.countdown-text');
-    
+
     modal.style.display = 'flex';
     modal.classList.add('show');
-    
+
     // Réinitialiser
     numberElement.style.fontSize = '';
     numberElement.textContent = '3';
     countdownText.style.display = '';
-    
+
     let count = 3;
-    
+
     const triggerAnimation = () => {
         numberElement.style.animation = 'none';
         void numberElement.offsetWidth; // force reflow
         numberElement.style.animation = 'countdownScale 0.9s cubic-bezier(0.34, 1.56, 0.64, 1)';
     };
-    
+
     triggerAnimation();
-    
-    const countdownInterval = setInterval(() => {
+
+    countdownInterval = setInterval(() => {
         count--;
         if (count > 0) {
             numberElement.textContent = count;
@@ -579,14 +597,15 @@ function showCountdown() {
             numberElement.style.fontSize = '4.5em';
             countdownText.style.display = 'none';
             triggerAnimation();
-            
-            setTimeout(() => {
+
+            countdownGoTimeout = setTimeout(() => {
                 modal.style.display = 'none';
                 modal.classList.remove('show');
                 startTimer();
             }, 900);
-            
+
             clearInterval(countdownInterval);
+            countdownInterval = null;
         }
     }, 1000);
 }

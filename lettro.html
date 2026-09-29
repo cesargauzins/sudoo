@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lettro - Sudoo</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="lettro.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="back-to-menu" title="Retour au menu">← Menu</a>
+            <h1>Lettro</h1>
+            <button id="view-leaderboard-btn" class="btn btn-leaderboard">🏆 Voir le Classement</button>
+        </header>
+
+        <div class="game-controls-bar">
+            <div class="timer">
+                <span class="timer-label">⏱️</span>
+                <span id="timer">03:00</span>
+            </div>
+            <div class="stat-badge">
+                <span class="stat-badge-icon">📝</span>
+                <span id="word-count" class="stat-badge-value">0</span>
+            </div>
+            <div class="stat-badge">
+                <span class="stat-badge-icon">⭐</span>
+                <span id="score-count" class="stat-badge-value">0</span>
+            </div>
+        </div>
+
+        <div class="lettro-grid-wrapper">
+            <div class="lettro-grid" id="lettro-grid"></div>
+            <div class="lettro-go-flash" id="go-flash">GO !</div>
+        </div>
+
+        <div class="lettro-input-row">
+            <input type="text" id="word-input" placeholder="Tapez un mot..." maxlength="9" autocomplete="off" autocapitalize="characters" disabled />
+            <button id="submit-word-btn" class="btn btn-primary">Valider</button>
+        </div>
+
+        <div class="lettro-found-words" id="found-words"></div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <!-- Modal résultat -->
+    <div id="lettro-result-modal" class="modal">
+        <div class="modal-content lettro-result-content">
+            <h2>⏱️ Temps écoulé !</h2>
+            <p>Voici votre résultat :</p>
+            <div class="time-display">
+                <span class="timer-label">📝 Mots trouvés :</span>
+                <span id="result-word-count" class="final-time">0</span>
+            </div>
+            <div class="time-display">
+                <span class="timer-label">⭐ Score :</span>
+                <span id="result-score" class="final-time">0</span>
+            </div>
+            <div class="lettro-result-words" id="result-words-list"></div>
+            <div class="name-input-container">
+                <label for="lettro-player-name">Entrez votre nom pour enregistrer votre score :</label>
+                <input type="text" id="lettro-player-name" maxlength="10" placeholder="Votre nom" />
+            </div>
+            <button id="submit-lettro-score-btn" class="btn btn-primary">📊 Enregistrer mon score</button>
+            <button id="skip-lettro-score-btn" class="btn btn-secondary">Passer</button>
+        </div>
+    </div>
+
+    <!-- Modal classement -->
+    <div id="leaderboard-modal" class="modal">
+        <div class="modal-content leaderboard-content">
+            <span class="close-btn" id="close-leaderboard">&times;</span>
+            <h2>🏆 Classement Mondial - Lettro</h2>
+            <div id="user-rank" class="user-rank"></div>
+            <div class="leaderboard-header">
+                <span class="rank-col">Rang</span>
+                <span class="name-col">Joueur</span>
+                <span class="time-col">Score</span>
+                <span class="date-col">Date</span>
+            </div>
+            <div id="leaderboard-list" class="leaderboard-list">
+                <div class="loading">Chargement...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="french-words.js"></script>
+    <script src="lettro.js"></script>
+</body>
+</html>

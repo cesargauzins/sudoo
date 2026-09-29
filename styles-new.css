@@ -529,13 +529,48 @@ body.dark-mode .erase-btn:hover {
 header {
     text-align: center;
     margin-bottom: 0;
+    position: relative;
 }
 
 h1 {
     color: #667eea;
-    font-size: 1.5em;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.75em;
+    font-weight: 800;
+    letter-spacing: -0.01em;
     margin-bottom: 0;
-    text-shadow: 0 2px 4px rgba(102, 126, 234, 0.15);
+    filter: drop-shadow(0 2px 3px rgba(102, 126, 234, 0.2));
+}
+
+.back-to-menu {
+    position: absolute;
+    z-index: 5;
+    top: 2px;
+    left: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 5px 13px;
+    font-size: 0.78em;
+    font-weight: 600;
+    color: #667eea;
+    background: #f6f7ff;
+    border: 1px solid rgba(102, 126, 234, 0.15);
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.1);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.back-to-menu:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+    transform: translateX(-2px);
 }
 
 .date {
@@ -1272,13 +1307,14 @@ body.dark-mode .sudoku-grid.notes-mode .cell.selected {
 .btn-leaderboard {
     background: #ffa726;
     color: white;
-    padding: 6px 16px;
+    padding: 10px 24px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     font-size: 0.9em;
     font-weight: bold;
-    margin-top: 4px;
+    margin: 10px 0 14px;
+    box-shadow: 0 3px 10px rgba(255, 167, 38, 0.3);
     transition: all 0.3s;
 }
 

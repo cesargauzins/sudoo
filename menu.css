@@ -1,0 +1,173 @@
+/* ============================================
+   MENU.CSS — Page d'accueil / sélection de jeu
+   Dépend de common.css (chargé avant ce fichier).
+   Pas de grand encadré blanc ici : le titre et les cartes
+   flottent directement sur le dégradé violet du body.
+   ============================================ */
+
+.menu-page {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 6px;
+}
+
+header {
+    margin-bottom: 32px;
+    margin-top: 8px;
+}
+
+h1.menu-title {
+    background: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    -webkit-text-fill-color: white;
+    color: white;
+    filter: none;
+    font-size: clamp(3.1em, 14vw, 4.9em);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 14px;
+    text-shadow: 0 4px 18px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.menu-subtitle {
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 1.05em;
+    font-weight: 500;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+}
+
+.game-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding: 4px;
+}
+
+.game-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 20px;
+    text-decoration: none;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 14px 32px rgba(30, 15, 60, 0.28), 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.25s ease;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 22px 44px rgba(30, 15, 60, 0.34), 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.game-card-icon {
+    flex: 0 0 auto;
+    width: 70px;
+    height: 70px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8em;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.game-card-icon-img {
+    background: #f4f5f9;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+    padding: 5px;
+}
+
+.game-card-icon-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+.game-card-info {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.game-card-info h2 {
+    color: #333;
+    font-size: 1.15em;
+    margin-bottom: 3px;
+}
+
+.game-card-info p {
+    color: #777;
+    font-size: 0.85em;
+    line-height: 1.3;
+}
+
+.game-card-badge {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 2px 8px;
+    font-size: 0.7em;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.12);
+    border-radius: 10px;
+    text-transform: uppercase;
+}
+
+.game-card-lettro .game-card-badge {
+    color: #fb8c00;
+    background: rgba(255, 167, 38, 0.15);
+}
+
+.game-card-arrow {
+    flex: 0 0 auto;
+    font-size: 1.4em;
+    color: #ccc;
+    transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.game-card:hover .game-card-arrow {
+    transform: translateX(4px);
+    color: #667eea;
+}
+
+.menu-footer {
+    margin-top: 24px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85em;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+}
+
+@media screen and (max-width: 480px) {
+    .menu-page {
+        padding: 6px 2px;
+    }
+
+    .game-card {
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .game-card-icon {
+        width: 55px;
+        height: 55px;
+        font-size: 1.5em;
+        border-radius: 14px;
+    }
+
+    .game-card-info h2 {
+        font-size: 1.02em;
+    }
+
+    .game-card-info p {
+        font-size: 0.8em;
+    }
+}
