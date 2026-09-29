@@ -118,10 +118,14 @@ function seededRandom(seed) {
 }
 
 // Obtenir la seed du jour
+// Incrémenter cette valeur change la grille générée pour toutes les dates
+// (y compris aujourd'hui) sans toucher au reste de la logique.
+const SEED_SALT = 1;
+
 function getTodaysSeed() {
     const today = new Date();
     const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-    return seed;
+    return seed + SEED_SALT * 999983; // grand nombre premier pour bien mélanger la seed
 }
 
 // Obtenir la clé du jour pour localStorage

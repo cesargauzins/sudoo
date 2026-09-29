@@ -49,9 +49,14 @@ function getTodayKey() {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 }
 
+// Incrémenter cette valeur change la grille générée pour toutes les dates
+// (y compris aujourd'hui) sans toucher au reste de la logique.
+const SEED_SALT = 1;
+
 function getTodaysSeed() {
     const today = new Date();
-    return today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate() + 77777;
+    const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate() + 77777;
+    return seed + SEED_SALT * 999983; // grand nombre premier pour bien mélanger la seed
 }
 
 function isTodayCompleted() {
