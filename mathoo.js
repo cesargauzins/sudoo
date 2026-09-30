@@ -7,6 +7,7 @@ let nextTileId = 1;
 let history = [];          // étapes de calcul effectuées
 let firstOperand = null;   // id de la première tuile sélectionnée
 let chosenOp = null;       // opérateur choisi en attente du second chiffre
+let lastResultId = null;   // id du dernier résultat calculé (utilisable tel quel comme réponse finale)
 let gameEnded = false;
 let startTime = null;
 let timerInterval = null;
@@ -151,6 +152,7 @@ function initializeGame() {
     history = [];
     firstOperand = null;
     chosenOp = null;
+    lastResultId = null;
     gameEnded = false;
     elapsedTime = 0;
     finalResult = null;
@@ -177,6 +179,7 @@ function restartMathoo() {
     history = [];
     firstOperand = null;
     chosenOp = null;
+    lastResultId = null;
     gameEnded = false;
     elapsedTime = 0;
     finalResult = null;
@@ -401,7 +404,10 @@ function updateOperatorButtonsState() {
 
 function updateValidateButtonState() {
     const available = tiles.filter(t => !t.used);
-    const canValidate = !gameEnded && (available.length === 1 || (firstOperand !== null && chosenOp === null));
+    const hasSelectedSingle = firstOperand !== null && chosenOp === null;
+    const hasImplicitResult = firstOperand === null && chosenOp === null &&
+        lastResultId !== null && tiles.some(t => t.id === lastResultId && !t.used);
+    const canValidate = !gameEnded && (available.length === 1 || hasSelectedSingle || hasImplicitResult);
     document.getElementById('validate-btn').disabled = !canValidate;
 }
 
@@ -419,6 +425,7 @@ function performOperationBetween(leftTile, rightTile, op) {
 
     const resultTile = { id: nextTileId++, value: resultValue, used: false, computed: true };
     tiles.push(resultTile);
+    lastResultId = resultTile.id;
 
     const opSymbol = { '+': '+', '-': '−', '*': '×', '/': '÷' }[op];
     history.push({
@@ -454,6 +461,7 @@ function undo() {
     tiles = tiles.filter(t => t.id !== last.resultId);
     firstOperand = null;
     chosenOp = null;
+    lastResultId = history.length > 0 ? history[history.length - 1].resultId : null;
 
     document.getElementById('mathoo-target').classList.remove('reached');
 
@@ -472,6 +480,7 @@ function resetGame() {
     history = [];
     firstOperand = null;
     chosenOp = null;
+    lastResultId = null;
 
     document.getElementById('mathoo-target').classList.remove('reached');
 
@@ -491,6 +500,10 @@ function validate() {
         finalValue = available[0].value;
     } else if (firstOperand !== null && chosenOp === null) {
         finalValue = tiles.find(t => t.id === firstOperand).value;
+    } else if (lastResultId !== null) {
+        const resultTile = tiles.find(t => t.id === lastResultId && !t.used);
+        if (!resultTile) return;
+        finalValue = resultTile.value;
     } else {
         return;
     }
@@ -628,6 +641,11 @@ function showResultModal() {
     document.getElementById('result-distance').textContent = finalResult.perfect ? '0 🎯' : finalResult.distance;
     document.getElementById('result-time').textContent = formatTime(finalResult.time);
 
+    // Réaffiche le formulaire d'enregistrement (masqué après une soumission précédente)
+    document.querySelector('#mathoo-result-modal .name-input-container').style.display = '';
+    document.getElementById('submit-mathoo-score-btn').style.display = '';
+    document.getElementById('skip-mathoo-score-btn').style.display = '';
+
     const stepsContainer = document.getElementById('mathoo-result-steps');
     stepsContainer.innerHTML = '';
     if (history.length === 0) {
@@ -690,8 +708,12 @@ async function submitMathooScore() {
 
         await database.ref(`scores/${today}/mathoo`).push(scoreData);
 
-        closeResultModal();
-        showMessage('🎉 Score enregistré avec succès !', 'success');
+        // On garde la modale ouverte (avec le bouton Recommencer) au lieu de la fermer,
+        // pour permettre de rejouer directement après l'enregistrement du score.
+        document.querySelector('#mathoo-result-modal .name-input-container').style.display = 'none';
+        submitBtn.style.display = 'none';
+        document.getElementById('skip-mathoo-score-btn').style.display = 'none';
+        document.getElementById('mathoo-result-text').textContent = '🎉 Score enregistré avec succès ! Vous pouvez rejouer si vous le souhaitez.';
 
     } catch (error) {
         console.error('Erreur lors de l\'enregistrement:', error);

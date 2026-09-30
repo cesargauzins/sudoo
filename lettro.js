@@ -1,4 +1,4 @@
-// Lettro — grille de 12 lettres (4x3), 5 minutes, un maximum de mots français.
+// Lettro (affiché sous le nom "Rapidoo") — grille de 12 lettres (4x3), 5 minutes, un maximum de mots français.
 
 const ROUND_DURATION = 300; // secondes
 const GRID_LETTER_COUNT = 12;
@@ -396,7 +396,7 @@ function showMessage(text, type) {
 
 function blockGame() {
     const messageEl = document.getElementById('message');
-    messageEl.innerHTML = '🎉 <strong>Vous avez déjà joué à Lettro aujourd’hui !</strong><br>Revenez demain pour une nouvelle grille ! 🔤';
+    messageEl.innerHTML = '🎉 <strong>Vous avez déjà joué à Rapidoo aujourd’hui !</strong><br>Revenez demain pour une nouvelle grille ! 🔤';
     messageEl.className = 'message success';
     messageEl.style.display = 'block';
 
@@ -533,7 +533,7 @@ async function showLeaderboard() {
         });
 
         if (scores.length === 0) {
-            leaderboardList.innerHTML = '<div class="loading">Aucun score enregistré pour Lettro aujourd\'hui</div>';
+            leaderboardList.innerHTML = '<div class="loading">Aucun score enregistré pour Rapidoo aujourd\'hui</div>';
             return;
         }
 
