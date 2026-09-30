@@ -1,4 +1,6 @@
-// Deminoo — Démineur quotidien : grille 11x11, 22 mines, la même pour tout le monde.
+// Deminoo — Démineur : grille 11x11, 22 mines, générée aléatoirement à chaque partie.
+// Les mines sont placées seulement après le tout premier clic, en évitant la case
+// cliquée et ses voisines, pour garantir une ouverture sûre comme dans un vrai démineur.
 
 const GRID_SIZE = 11;
 const MINE_COUNT = 22;
@@ -6,6 +8,7 @@ const EARLY_DEATH_MOVE_LIMIT = 5; // rejouer autorisé si la mine tombe dans ces
 
 let database = null;
 let board = [];            // [row][col] = { isMine, adjacent, revealed, flagged }
+let minesPlaced = false;   // les mines ne sont placées qu'au premier clic
 let flagMode = false;
 let gameEnded = false;
 let isWon = false;
@@ -51,16 +54,6 @@ function getTodayKey() {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 }
 
-// Incrémenter cette valeur change la grille du jour (y compris aujourd'hui)
-// sans toucher au reste de la logique.
-const SEED_SALT = 1;
-
-function getTodaysSeed() {
-    const today = new Date();
-    const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate() + 333333;
-    return seed + SEED_SALT * 999983;
-}
-
 function isTodayCompleted() {
     return localStorage.getItem(`deminoo-completed-${getTodayKey()}`) === 'true';
 }
@@ -69,14 +62,10 @@ function markTodayCompleted() {
     localStorage.setItem(`deminoo-completed-${getTodayKey()}`, 'true');
 }
 
-// ---------- Génération de la grille du jour ----------
+// ---------- Génération de la grille ----------
 
-function seededRandom(seed) {
-    const x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
-}
-
-function generateBoard(seed) {
+// Grille vide, sans mines : les mines ne sont placées qu'au premier clic du joueur.
+function createEmptyBoard() {
     const cells = [];
     for (let row = 0; row < GRID_SIZE; row++) {
         cells.push([]);
@@ -84,22 +73,23 @@ function generateBoard(seed) {
             cells[row].push({ isMine: false, adjacent: 0, revealed: false, flagged: false });
         }
     }
+    return cells;
+}
 
-    // Zone sûre garantie au centre (3x3), pour que la première ouverture soit toujours jouable
-    const safeMin = Math.floor(GRID_SIZE / 2) - 1;
-    const safeMax = Math.floor(GRID_SIZE / 2) + 1;
-
+// Place les mines aléatoirement en excluant la case cliquée en premier et ses
+// voisines directes, pour garantir une première ouverture sûre et généreuse
+// (comme dans un vrai démineur).
+function placeMinesAvoiding(cells, safeRow, safeCol) {
     const candidates = [];
     for (let row = 0; row < GRID_SIZE; row++) {
         for (let col = 0; col < GRID_SIZE; col++) {
-            const inSafeZone = row >= safeMin && row <= safeMax && col >= safeMin && col <= safeMax;
-            if (!inSafeZone) candidates.push({ row, col });
+            const isSafeZone = Math.abs(row - safeRow) <= 1 && Math.abs(col - safeCol) <= 1;
+            if (!isSafeZone) candidates.push({ row, col });
         }
     }
 
-    // Mélange déterministe (Fisher-Yates) des positions candidates
     for (let i = candidates.length - 1; i > 0; i--) {
-        const j = Math.floor(seededRandom(seed + i) * (i + 1));
+        const j = Math.floor(Math.random() * (i + 1));
         [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
     }
 
@@ -114,8 +104,6 @@ function generateBoard(seed) {
             cells[row][col].adjacent = countAdjacentMines(cells, row, col);
         }
     }
-
-    return cells;
 }
 
 function countAdjacentMines(cells, row, col) {
@@ -133,8 +121,8 @@ function countAdjacentMines(cells, row, col) {
 // ---------- Initialisation ----------
 
 function initializeGame() {
-    const seed = getTodaysSeed();
-    board = generateBoard(seed);
+    board = createEmptyBoard();
+    minesPlaced = false;
     flagMode = false;
     gameEnded = false;
     isWon = false;
@@ -270,6 +258,11 @@ function revealCell(row, col) {
     const cell = board[row][col];
     if (cell.revealed || cell.flagged) return;
 
+    if (!minesPlaced) {
+        placeMinesAvoiding(board, row, col);
+        minesPlaced = true;
+    }
+
     moveCount++;
 
     if (cell.isMine) {
@@ -373,16 +366,16 @@ function disableControls() {
 
 function resetGame() {
     if (gameEnded) return;
-    if (!confirm('Recommencer la grille du jour depuis le début ?')) return;
+    if (!confirm('Recommencer avec une nouvelle grille ?')) return;
     restartDeminoo();
 }
 
-// Relance la grille du jour (même mines, même disposition) — comptabilisée
-// normalement au classement, comme une première tentative.
+// Relance avec une toute nouvelle grille aléatoire — comptabilisée normalement
+// au classement, comme une première tentative.
 function restartDeminoo() {
     closeResultModal();
     initializeGame();
-    showMessage('🔄 Nouvelle tentative sur la grille du jour !', 'info');
+    showMessage('🔄 Nouvelle grille !', 'info');
 }
 
 // ---------- Rendu ----------
