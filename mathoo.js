@@ -644,7 +644,9 @@ function showResultModal() {
     // Réaffiche le formulaire d'enregistrement (masqué après une soumission précédente)
     document.querySelector('#mathoo-result-modal .name-input-container').style.display = '';
     document.getElementById('submit-mathoo-score-btn').style.display = '';
-    document.getElementById('skip-mathoo-score-btn').style.display = '';
+    const skipBtn = document.getElementById('skip-mathoo-score-btn');
+    skipBtn.style.display = '';
+    skipBtn.textContent = 'Passer';
 
     const stepsContainer = document.getElementById('mathoo-result-steps');
     stepsContainer.innerHTML = '';
@@ -708,12 +710,14 @@ async function submitMathooScore() {
 
         await database.ref(`scores/${today}/mathoo`).push(scoreData);
 
-        // On garde la modale ouverte (avec le bouton Recommencer) au lieu de la fermer,
-        // pour permettre de rejouer directement après l'enregistrement du score.
+        // On garde la modale ouverte (avec Recommencer et Fermer) au lieu de la fermer
+        // directement, pour permettre de rejouer sans redemander le nom — mais on laisse
+        // toujours un moyen de fermer la modale pour retourner au menu.
         document.querySelector('#mathoo-result-modal .name-input-container').style.display = 'none';
         submitBtn.style.display = 'none';
-        document.getElementById('skip-mathoo-score-btn').style.display = 'none';
-        document.getElementById('mathoo-result-text').textContent = '🎉 Score enregistré avec succès ! Vous pouvez rejouer si vous le souhaitez.';
+        const skipBtn = document.getElementById('skip-mathoo-score-btn');
+        skipBtn.textContent = 'Fermer';
+        document.getElementById('mathoo-result-text').textContent = '🎉 Score enregistré avec succès ! Vous pouvez rejouer ou fermer cette fenêtre.';
 
     } catch (error) {
         console.error('Erreur lors de l\'enregistrement:', error);
