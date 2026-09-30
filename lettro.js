@@ -315,7 +315,7 @@ function isLikelyPlural(word) {
     const lastChar = word[word.length - 1];
     if (lastChar !== 's' && lastChar !== 'x') return false;
     const base = word.slice(0, -1);
-    return base.length >= 2 && FRENCH_WORDS_SET.has(base);
+    return base.length >= 2 && FRENCH_SINGULAR_BASE_SET.has(base);
 }
 
 function canFormFromGrid(word) {
