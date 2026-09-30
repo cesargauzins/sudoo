@@ -69,18 +69,24 @@ function closeLeaderboard() {
     modal.style.display = 'none';
 }
 
+// Ne vide jamais la liste avant d'avoir les nouvelles données : on garde l'ancien
+// contenu affiché (léger fondu) pendant le chargement, puis on remplace en une seule
+// fois, pour éviter le clignotement disparition/réapparition en changeant d'onglet.
 async function loadLeaderboard() {
     const listEl = document.getElementById('leaderboard-list');
     const subTabs = document.getElementById('sudoku-sub-tabs');
     const resultLabel = document.getElementById('leaderboard-result-label');
+    const requestId = ++loadLeaderboard.requestId;
 
     subTabs.style.display = currentGame === 'sudoku' ? 'flex' : 'none';
     resultLabel.textContent = currentGame === 'mathoo' ? 'Résultat' : (currentGame === 'lettro' ? 'Score' : 'Temps');
 
-    listEl.innerHTML = '<div class="loading">Chargement du classement...</div>';
+    listEl.classList.add('loading-fade');
 
     if (!database) {
+        if (requestId !== loadLeaderboard.requestId) return;
         listEl.innerHTML = '<div class="loading">⚠️ Le classement nécessite la configuration de Firebase.</div>';
+        listEl.classList.remove('loading-fade');
         return;
     }
 
@@ -92,8 +98,13 @@ async function loadLeaderboard() {
         const scores = [];
         snapshot.forEach((child) => { scores.push({ id: child.key, ...child.val() }); });
 
+        // Si l'utilisateur a re-changé d'onglet entre-temps, on ignore cette réponse
+        // devenue obsolète pour ne pas écraser l'onglet actuellement affiché.
+        if (requestId !== loadLeaderboard.requestId) return;
+
         if (scores.length === 0) {
             listEl.innerHTML = '<div class="loading">Aucun score enregistré ici aujourd\'hui</div>';
+            listEl.classList.remove('loading-fade');
             return;
         }
 
@@ -105,11 +116,15 @@ async function loadLeaderboard() {
             // 'sudoku' et 'deminoo' partagent le même format (temps + perdu)
             renderSudokuScores(scores, listEl);
         }
+        listEl.classList.remove('loading-fade');
     } catch (error) {
         console.error('Erreur lors du chargement du classement:', error);
+        if (requestId !== loadLeaderboard.requestId) return;
         listEl.innerHTML = '<div class="loading">Erreur lors du chargement du classement</div>';
+        listEl.classList.remove('loading-fade');
     }
 }
+loadLeaderboard.requestId = 0;
 
 function renderSudokuScores(scores, listEl) {
     scores.sort((a, b) => {

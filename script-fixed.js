@@ -1636,15 +1636,18 @@ async function showLeaderboard(selectedDifficulty = 'simple') {
     const nameModal = document.getElementById('name-modal');
     nameModal.classList.remove('show');
     nameModal.style.display = 'none';
-    
+
     const modal = document.getElementById('leaderboard-modal');
     const leaderboardList = document.getElementById('leaderboard-list');
     const userRankDiv = document.getElementById('user-rank');
-    
+    const requestId = ++showLeaderboard.requestId;
+
     modal.style.display = 'flex';
     modal.classList.add('show');
-    
-    leaderboardList.innerHTML = '<div class="loading">Chargement du classement...</div>';
+
+    // On garde l'ancien contenu affiché (léger fondu) pendant le chargement au lieu de
+    // le vider immédiatement, pour éviter le clignotement en changeant d'onglet.
+    leaderboardList.classList.add('loading-fade');
     userRankDiv.innerHTML = '';
     
     // Créer les onglets de difficulté
@@ -1681,14 +1684,16 @@ async function showLeaderboard(selectedDifficulty = 'simple') {
     }
     
     if (!database) {
+        if (requestId !== showLeaderboard.requestId) return;
         leaderboardList.innerHTML = '<div class="loading">⚠️ Le classement nécessite la configuration de Firebase.<br><br>Consultez le README.md pour les instructions.</div>';
+        leaderboardList.classList.remove('loading-fade');
         return;
     }
-    
+
     try {
         const today = getTodayKey();
         const snapshot = await database.ref(`scores/${today}/${selectedDifficulty}`).orderByChild('time').once('value');
-        
+
         const scores = [];
         snapshot.forEach((childSnapshot) => {
             scores.push({
@@ -1696,10 +1701,15 @@ async function showLeaderboard(selectedDifficulty = 'simple') {
                 ...childSnapshot.val()
             });
         });
-        
+
+        // Si l'utilisateur a re-changé d'onglet entre-temps, on ignore cette réponse
+        // devenue obsolète pour ne pas écraser l'onglet actuellement affiché.
+        if (requestId !== showLeaderboard.requestId) return;
+
         if (scores.length === 0) {
             const levelName = DIFFICULTY_LEVELS[selectedDifficulty].label;
             leaderboardList.innerHTML = `<div class="loading">Aucun score enregistré pour le niveau ${levelName} aujourd'hui</div>`;
+            leaderboardList.classList.remove('loading-fade');
             return;
         }
         
@@ -1777,11 +1787,16 @@ async function showLeaderboard(selectedDifficulty = 'simple') {
             `;
         }
 
+        leaderboardList.classList.remove('loading-fade');
+
     } catch (error) {
         console.error('Erreur lors du chargement du classement:', error);
+        if (requestId !== showLeaderboard.requestId) return;
         leaderboardList.innerHTML = '<div class="loading">Erreur lors du chargement du classement</div>';
+        leaderboardList.classList.remove('loading-fade');
     }
 }
+showLeaderboard.requestId = 0;
 
 // Fermer le modal du classement
 function closeLeaderboard() {

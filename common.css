@@ -472,6 +472,11 @@ h1 {
 .leaderboard-list {
     max-height: 400px;
     overflow-y: auto;
+    transition: opacity 0.15s ease;
+}
+
+.leaderboard-list.loading-fade {
+    opacity: 0.4;
 }
 
 .leaderboard-item {
