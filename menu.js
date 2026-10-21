@@ -204,16 +204,22 @@ function renderMathooScores(scores, listEl) {
         const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
         if (rank <= 3) item.classList.add('top-3');
         const date = new Date(s.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-        const resultDisplay = s.perfect ? '🎯 Compte bon !' : `Écart : ${s.distance}`;
+        const resultDisplay = s.perfect ? '🎯 Compte bon' : `Écart ${s.distance}`;
 
         item.innerHTML = `
             <div class="rank-col">${medal} ${rank}</div>
             <div class="name-col">${escapeHtml(s.name)}</div>
-            <div class="time-col">${resultDisplay}</div>
+            <div class="time-col">${resultDisplay}<br><small class="lb-time">⏱️ ${formatTime(s.time || 0)}</small></div>
             <div class="date-col">${date}</div>
         `;
         listEl.appendChild(item);
     });
+}
+
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
 }
 
 function escapeHtml(text) {

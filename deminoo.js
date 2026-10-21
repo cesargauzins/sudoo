@@ -1,9 +1,11 @@
-// Deminoo — Démineur : grille 11x11, 22 mines, générée aléatoirement à chaque partie.
+// Deminoo — Démineur : grille 13x13, 28 mines, générée aléatoirement à chaque partie.
 // Les mines sont placées seulement après le tout premier clic, en évitant la case
-// cliquée et ses voisines, pour garantir une ouverture sûre comme dans un vrai démineur.
+// cliquée et ses voisines, et on ne garde qu'une grille résoluble entièrement par
+// déduction depuis ce premier clic : le joueur n'a jamais besoin de deviner.
 
-const GRID_SIZE = 11;
-const MINE_COUNT = 22;
+const GRID_SIZE = 13;
+const MINE_COUNT = 28;
+const MAX_GENERATION_ATTEMPTS = 400;
 const EARLY_DEATH_MOVE_LIMIT = 5; // rejouer autorisé si la mine tombe dans ces N premiers coups
 
 let database = null;
@@ -76,10 +78,28 @@ function createEmptyBoard() {
     return cells;
 }
 
-// Place les mines aléatoirement en excluant la case cliquée en premier et ses
-// voisines directes, pour garantir une première ouverture sûre et généreuse
-// (comme dans un vrai démineur).
+// Tire des grilles jusqu'à en trouver une résoluble sans hasard depuis la case
+// cliquée (au pire on garde la dernière tirée, ce qui reste un démineur classique).
 function placeMinesAvoiding(cells, safeRow, safeCol) {
+    for (let attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt++) {
+        clearMines(cells);
+        placeRandomMines(cells, safeRow, safeCol);
+        if (isSolvableWithoutGuessing(cells, safeRow, safeCol)) return;
+    }
+}
+
+function clearMines(cells) {
+    for (let row = 0; row < GRID_SIZE; row++) {
+        for (let col = 0; col < GRID_SIZE; col++) {
+            cells[row][col].isMine = false;
+            cells[row][col].adjacent = 0;
+        }
+    }
+}
+
+// Place les mines aléatoirement en excluant la case cliquée en premier et ses
+// voisines directes, pour garantir une première ouverture sûre et généreuse.
+function placeRandomMines(cells, safeRow, safeCol) {
     const candidates = [];
     for (let row = 0; row < GRID_SIZE; row++) {
         for (let col = 0; col < GRID_SIZE; col++) {
@@ -104,6 +124,120 @@ function placeMinesAvoiding(cells, safeRow, safeCol) {
             cells[row][col].adjacent = countAdjacentMines(cells, row, col);
         }
     }
+}
+
+function neighborIndices(index) {
+    const row = Math.floor(index / GRID_SIZE), col = index % GRID_SIZE;
+    const result = [];
+    for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+            if (dr === 0 && dc === 0) continue;
+            const r = row + dr, c = col + dc;
+            if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE) result.push(r * GRID_SIZE + c);
+        }
+    }
+    return result;
+}
+
+// Joue la partie comme un joueur logique : règles simples (chiffre satisfait /
+// cases restantes toutes minées), règle des sous-ensembles entre deux chiffres
+// voisins, et compte total des mines en fin de partie. Renvoie vrai si toutes
+// les cases sûres finissent révélées sans jamais avoir à deviner.
+function isSolvableWithoutGuessing(cells, safeRow, safeCol) {
+    const total = GRID_SIZE * GRID_SIZE;
+    const isMine = new Array(total), adjacent = new Array(total);
+    for (let i = 0; i < total; i++) {
+        const cell = cells[Math.floor(i / GRID_SIZE)][i % GRID_SIZE];
+        isMine[i] = cell.isMine;
+        adjacent[i] = cell.adjacent;
+    }
+    const neighbors = [];
+    for (let i = 0; i < total; i++) neighbors.push(neighborIndices(i));
+
+    const revealed = new Array(total).fill(false);
+    const flagged = new Array(total).fill(false);
+    let revealedSafe = 0;
+    const safeTotal = total - MINE_COUNT;
+
+    function reveal(start) {
+        const stack = [start];
+        while (stack.length) {
+            const i = stack.pop();
+            if (revealed[i] || flagged[i]) continue;
+            if (isMine[i]) return false; // ne devrait jamais arriver : déduction fausse
+            revealed[i] = true;
+            revealedSafe++;
+            if (adjacent[i] === 0) neighbors[i].forEach(n => { if (!revealed[n]) stack.push(n); });
+        }
+        return true;
+    }
+
+    reveal(safeRow * GRID_SIZE + safeCol);
+
+    let progress = true;
+    while (progress && revealedSafe < safeTotal) {
+        progress = false;
+
+        // Contraintes actuelles : pour chaque chiffre au bord, ses voisines inconnues
+        // et le nombre de mines qu'il reste à y placer.
+        const constraints = [];
+        for (let i = 0; i < total; i++) {
+            if (!revealed[i] || adjacent[i] === 0) continue;
+            const unknown = [];
+            let flags = 0;
+            neighbors[i].forEach(n => {
+                if (flagged[n]) flags++;
+                else if (!revealed[n]) unknown.push(n);
+            });
+            if (unknown.length === 0) continue;
+            constraints.push({ unknown, mines: adjacent[i] - flags });
+        }
+
+        const toReveal = new Set(), toFlag = new Set();
+        constraints.forEach(c => {
+            if (c.mines === 0) c.unknown.forEach(n => toReveal.add(n));
+            else if (c.mines === c.unknown.length) c.unknown.forEach(n => toFlag.add(n));
+        });
+
+        if (toReveal.size === 0 && toFlag.size === 0) {
+            for (let a = 0; a < constraints.length && !toReveal.size && !toFlag.size; a++) {
+                const A = constraints[a];
+                const setA = new Set(A.unknown);
+                for (let b = 0; b < constraints.length; b++) {
+                    if (a === b) continue;
+                    const B = constraints[b];
+                    if (B.unknown.length <= A.unknown.length) continue;
+                    if (!A.unknown.every(n => B.unknown.includes(n))) continue;
+                    const rest = B.unknown.filter(n => !setA.has(n));
+                    const restMines = B.mines - A.mines;
+                    if (restMines === 0) rest.forEach(n => toReveal.add(n));
+                    else if (restMines === rest.length) rest.forEach(n => toFlag.add(n));
+                }
+            }
+        }
+
+        if (toReveal.size === 0 && toFlag.size === 0) {
+            // Compte global : si toutes les mines sont trouvées, le reste est sûr ;
+            // si les cases inconnues sont exactement les mines restantes, on les marque.
+            let flagCount = 0;
+            const unknownAll = [];
+            for (let i = 0; i < total; i++) {
+                if (flagged[i]) flagCount++;
+                else if (!revealed[i]) unknownAll.push(i);
+            }
+            if (flagCount === MINE_COUNT) unknownAll.forEach(n => toReveal.add(n));
+            else if (unknownAll.length === MINE_COUNT - flagCount) unknownAll.forEach(n => toFlag.add(n));
+        }
+
+        toFlag.forEach(n => { if (!flagged[n]) { flagged[n] = true; progress = true; } });
+        for (const n of toReveal) {
+            if (revealed[n]) continue;
+            if (!reveal(n)) return false;
+            progress = true;
+        }
+    }
+
+    return revealedSafe === safeTotal;
 }
 
 function countAdjacentMines(cells, row, col) {

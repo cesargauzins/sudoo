@@ -1,5 +1,5 @@
 /* ============================================
-   DEMINOO.CSS — Démineur quotidien (grille 9x9, 10 mines)
+   DEMINOO.CSS — Démineur quotidien (grille 13x13, 28 mines)
    Dépend de common.css (chargé avant ce fichier)
    ============================================ */
 
@@ -13,10 +13,10 @@
 
 .deminoo-grid {
     display: grid;
-    grid-template-columns: repeat(11, 1fr);
-    grid-template-rows: repeat(11, 1fr);
+    grid-template-columns: repeat(13, 1fr);
+    grid-template-rows: repeat(13, 1fr);
     gap: 2px;
-    width: min(100%, 400px);
+    width: min(100%, 440px);
     aspect-ratio: 1 / 1;
     margin: 10px auto;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -116,14 +116,14 @@
 
 @media screen and (max-width: 480px) {
     .deminoo-cell {
-        font-size: 0.8em;
+        font-size: 0.72em;
         border-radius: 3px;
     }
 }
 
 @media screen and (max-height: 720px) {
     .deminoo-grid {
-        width: min(100%, 320px) !important;
+        width: min(100%, 350px) !important;
         margin: 6px auto !important;
     }
 }

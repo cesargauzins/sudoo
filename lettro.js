@@ -2,10 +2,11 @@
 
 const ROUND_DURATION = 300; // secondes
 const GRID_LETTER_COUNT = 12;
-const MIN_VOWELS = 4;
 
 let database = null;
-let grid = [];                 // 9 lettres de la grille du jour
+let grid = [];                 // 12 lettres de la grille du jour
+let fullGridWord = '';         // mot de 12 lettres caché dans la grille du jour
+let fullWordFound = false;
 let letterCounts = {};         // occurrences de chaque lettre dans la grille
 let foundWords = [];           // [{ word, points }]
 let foundWordSet = new Set();  // mots déjà trouvés (normalisés)
@@ -76,38 +77,60 @@ function seededRandom(seed) {
     return x - Math.floor(x);
 }
 
-// Pool de lettres pondéré selon la fréquence approximative en français
-const LETTER_POOL = (
-    'E'.repeat(15) + 'A'.repeat(9) + 'I'.repeat(8) + 'S'.repeat(8) + 'N'.repeat(7) +
-    'T'.repeat(7) + 'R'.repeat(7) + 'U'.repeat(6) + 'L'.repeat(6) + 'O'.repeat(6) +
-    'D'.repeat(4) + 'C'.repeat(3) + 'P'.repeat(3) + 'M'.repeat(3) + 'V'.repeat(2) +
-    'Q' + 'F' + 'B' + 'G' + 'H' + 'J' + 'X' + 'Y' + 'Z' + 'K' + 'W'
-).split('');
+// La grille du jour est un mélange des lettres d'un mot courant de 12 lettres :
+// il est donc toujours possible d'utiliser toutes les lettres. Trouver un mot
+// de 12 lettres (celui-ci ou une autre anagramme valide) double ses points.
+// Tous ces mots sont présents dans le dictionnaire et ne sont pas des pluriels.
+const FULL_GRID_WORDS = [
+    'accompagnant', 'actuellement', 'alimentation', 'ambassadrice', 'amelioration', 'anesthesiste', 'anniversaire', 'appartenance',
+    'architecture', 'arithmetique', 'articulation', 'astronomique', 'attractivite', 'augmentation', 'autorisation', 'balbutiement',
+    'bibliotheque', 'bienveillant', 'bombardement', 'bouleversant', 'cantonnement', 'capitulation', 'caracteriser', 'cartographie',
+    'chocolaterie', 'choregraphie', 'chrysantheme', 'chuchotement', 'civilisation', 'clignotement', 'commencement', 'commissariat',
+    'compatissant', 'complaisance', 'complication', 'comportement', 'conditionnel', 'connaissance', 'conservateur', 'considerable',
+    'consommateur', 'construction', 'consultation', 'contemplatif', 'contemporain', 'continuation', 'contribution', 'convalescent',
+    'conversation', 'coordination', 'correctement', 'correspondre', 'criminologue', 'cristalliser', 'culpabiliser', 'deambulation',
+    'debrouillard', 'degringolade', 'deliberement', 'delicatement', 'demenagement', 'democratique', 'depoussierer', 'desequilibre',
+    'desobeissant', 'destinataire', 'detournement', 'dictionnaire', 'differemment', 'dimensionner', 'diplomatique', 'dissertation',
+    'distribution', 'divertissant', 'documentaire', 'effervescent', 'effondrement', 'electronique', 'embarquement', 'embrassement',
+    'emmenagement', 'enchantement', 'encombrement', 'encyclopedie', 'enfantillage', 'enjolivement', 'enseignement', 'enthousiasme',
+    'entrainement', 'entrechoquer', 'entrecroiser', 'entrepreneur', 'epouvantable', 'equilibriste', 'exceptionnel', 'experimental',
+    'exploitation', 'exploratrice', 'facilitateur', 'fanfaronnade', 'fracassement', 'generalement', 'geographique', 'gouvernement',
+    'grenouillere', 'gribouillage', 'hypothetique', 'illumination', 'incandescent', 'incomparable', 'inconsolable', 'inconvenient',
+    'independance', 'indiscutable', 'inexplicable', 'installation', 'instrumental', 'intellectuel', 'intelligence', 'interessante',
+    'interminable', 'intervention', 'kaleidoscope', 'lexicographe', 'localisation', 'magnetoscope', 'maroquinerie', 'mathematique',
+    'melancolique', 'merveilleuse', 'meteorologie', 'methodologie', 'mobilisation', 'modification', 'montgolfiere', 'mousquetaire',
+    'negligemment', 'nouvellement', 'observatoire', 'organisateur', 'organisation', 'orthographie', 'pantouflarde', 'paperasserie',
+    'papillonnage', 'parachutiste', 'parfaitement', 'particuliere', 'personnalite', 'photocopieur', 'photographie', 'physiquement',
+    'plaisanterie', 'poissonnerie', 'portefeuille', 'pratiquement', 'premierement', 'presentateur', 'presentation', 'prestigieuse',
+    'probablement', 'proclamation', 'proprietaire', 'protestation', 'publicitaire', 'raisonnement', 'ramification', 'realisatrice',
+    'regroupement', 'relativement', 'remerciement', 'remplacement', 'repercussion', 'representant', 'reproduction', 'respectueuse',
+    'ressemblance', 'restauration', 'retournement', 'saltimbanque', 'satisfaisant', 'sautillement', 'scientifique', 'sensiblement',
+    'sentimentale', 'serieusement', 'significatif', 'soudainement', 'spontanement', 'surveillance', 'systematique', 'tambourinage',
+    'telecommande', 'telephonique', 'terriblement', 'territoriale', 'traditionnel', 'tranquillite', 'transmission', 'transparence',
+    'transporteur', 'travailleuse', 'trebuchement', 'vertigineuse'
+];
 
-const VOWELS = new Set(['A', 'E', 'I', 'O', 'U', 'Y']);
+// Numéro du jour (depuis 1970) : on parcourt la liste avec un pas premier avec sa
+// taille, pour qu'aucun mot ne revienne avant d'avoir vu passer tous les autres.
+function getDayNumber() {
+    const today = new Date();
+    return Math.floor(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) / 86400000);
+}
 
 function generateDailyGrid(seed) {
-    const letters = [];
-    for (let i = 0; i < GRID_LETTER_COUNT; i++) {
-        const idx = Math.floor(seededRandom(seed + i) * LETTER_POOL.length);
-        letters.push(LETTER_POOL[idx]);
-    }
+    const word = FULL_GRID_WORDS[(getDayNumber() * 37 + SEED_SALT) % FULL_GRID_WORDS.length];
+    const letters = word.toUpperCase().split('');
 
-    // Filet de sécurité : garantir un minimum de voyelles pour que la grille soit jouable
-    const vowelPool = ['A', 'E', 'I', 'O', 'U'];
-    let vowelCount = letters.filter(l => VOWELS.has(l)).length;
-    let attempt = 0;
-    while (vowelCount < MIN_VOWELS && attempt < 30) {
-        const replaceIdx = Math.floor(seededRandom(seed + 200 + attempt) * GRID_LETTER_COUNT);
-        if (!VOWELS.has(letters[replaceIdx])) {
-            const vowelIdx = Math.floor(seededRandom(seed + 300 + attempt) * vowelPool.length);
-            letters[replaceIdx] = vowelPool[vowelIdx];
-            vowelCount++;
+    // Mélange déterministe ; on refait un tour si le mot se lit tel quel dans la grille
+    for (let round = 0; round < 5; round++) {
+        for (let i = letters.length - 1; i > 0; i--) {
+            const j = Math.floor(seededRandom(seed + round * 50 + i) * (i + 1));
+            [letters[i], letters[j]] = [letters[j], letters[i]];
         }
-        attempt++;
+        if (letters.join('') !== word.toUpperCase()) break;
     }
 
-    return letters;
+    return { letters, word };
 }
 
 function computeLetterCounts(letters) {
@@ -121,7 +144,10 @@ function computeLetterCounts(letters) {
 // ---------- Initialisation / animation d'intro ----------
 
 function initializeGame() {
-    grid = generateDailyGrid(getTodaysSeed());
+    const daily = generateDailyGrid(getTodaysSeed());
+    grid = daily.letters;
+    fullGridWord = daily.word;
+    fullWordFound = false;
     letterCounts = computeLetterCounts(grid);
 
     foundWords = [];
@@ -337,16 +363,46 @@ function rejectWord(reason) {
 }
 
 function acceptWord(normalized) {
-    const points = normalized.length;
-    foundWords.push({ word: normalized, points });
+    const isFullWord = normalized.length === GRID_LETTER_COUNT;
+    const points = isFullWord ? normalized.length * 2 : normalized.length;
+    foundWords.push({ word: normalized, points, full: isFullWord });
     foundWordSet.add(normalized);
     score += points;
 
     updateWordCountDisplay();
     updateScoreDisplay();
-    addWordChip(normalized, points);
-    flashUsedCells(normalized);
-    showMessage(`✓ ${normalized.toUpperCase()} (+${points})`, 'success');
+    addWordChip(normalized, points, isFullWord);
+
+    if (isFullWord) {
+        fullWordFound = true;
+        playFullWordAnimation(normalized, points);
+        showMessage(`💎 ${normalized.toUpperCase()} — points doublés ! (+${points})`, 'success');
+    } else {
+        flashUsedCells(normalized);
+        showMessage(`✓ ${normalized.toUpperCase()} (+${points})`, 'success');
+    }
+}
+
+// Mot de 12 lettres trouvé : toute la grille s'illumine en cascade, une bannière
+// annonce le bonus x2 et des confettis tombent.
+function playFullWordAnimation(word, points) {
+    const cells = document.querySelectorAll('.lettro-cell');
+    cells.forEach((cell, i) => {
+        setTimeout(() => {
+            cell.classList.add('full-word');
+            setTimeout(() => cell.classList.remove('full-word'), 1600);
+        }, i * 70);
+    });
+
+    const banner = document.createElement('div');
+    banner.className = 'lettro-full-word-banner';
+    banner.innerHTML = `<span class="lettro-full-word-title">💎 MOT COMPLET ! 💎</span>
+        <span class="lettro-full-word-word">${word.toUpperCase()}</span>
+        <span class="lettro-full-word-bonus">Points doublés : +${points}</span>`;
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 2600);
+
+    celebrate();
 }
 
 function flashUsedCells(word) {
@@ -365,10 +421,10 @@ function flashUsedCells(word) {
     }, 400);
 }
 
-function addWordChip(word, points) {
+function addWordChip(word, points, isFullWord) {
     const container = document.getElementById('found-words');
     const chip = document.createElement('span');
-    chip.className = 'lettro-word-chip';
+    chip.className = isFullWord ? 'lettro-word-chip full-word' : 'lettro-word-chip';
     chip.innerHTML = `${word.toUpperCase()} <span class="chip-points">+${points}</span>`;
     container.appendChild(chip);
     container.scrollTop = container.scrollHeight;
@@ -441,12 +497,17 @@ function showResultModal() {
     foundWords
         .slice()
         .sort((a, b) => b.points - a.points)
-        .forEach(({ word, points }) => {
+        .forEach(({ word, points, full }) => {
             const chip = document.createElement('span');
-            chip.className = 'lettro-word-chip';
+            chip.className = full ? 'lettro-word-chip full-word' : 'lettro-word-chip';
             chip.innerHTML = `${word.toUpperCase()} <span class="chip-points">+${points}</span>`;
             wordsList.appendChild(chip);
         });
+
+    const revealEl = document.getElementById('result-full-word');
+    revealEl.innerHTML = fullWordFound
+        ? '💎 Bravo, vous avez trouvé le mot de 12 lettres !'
+        : `💎 Le mot de 12 lettres était : <strong>${fullGridWord.toUpperCase()}</strong>`;
 
     const modal = document.getElementById('lettro-result-modal');
     modal.style.display = 'flex';

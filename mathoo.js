@@ -122,23 +122,108 @@ function seededRandom(seed) {
     return x - Math.floor(x);
 }
 
+// Difficulté : peu de grands nombres (0 ou 1 au lieu de 0 à 4), cible entre 201
+// et 999, et on n'accepte que des tirages où la cible est atteignable exactement
+// mais jamais avec moins de MIN_NUMBERS_REQUIRED nombres. Le tirage reste
+// déterministe : si une combinaison ne convient pas, on passe à la suivante.
+const MIN_NUMBERS_REQUIRED = 4;
+const MAX_INTERMEDIATE = 100000;
+
 function generateDailyPuzzle(seed) {
-    const bag = [];
-    for (let i = 1; i <= 10; i++) {
-        bag.push(i);
-        bag.push(i);
+    let fallback = null;
+    for (let attempt = 0; attempt < 200; attempt++) {
+        const s = seed + attempt * 7919;
+        const small = [];
+        for (let i = 1; i <= 10; i++) small.push(i, i);
+        for (let i = small.length - 1; i > 0; i--) {
+            const j = Math.floor(seededRandom(s + i) * (i + 1));
+            [small[i], small[j]] = [small[j], small[i]];
+        }
+
+        const bigCount = seededRandom(s + 400) < 0.5 ? 0 : 1;
+        const numbers = small.slice(0, 6 - bigCount);
+        if (bigCount) numbers.push([25, 50, 75, 100][Math.floor(seededRandom(s + 450) * 4)]);
+
+        const puzzleTarget = 201 + Math.floor(seededRandom(s + 500) * 799);
+        const needed = minNumbersToReach(computeReachableBySubset(numbers), puzzleTarget);
+
+        if (needed !== Infinity && needed >= MIN_NUMBERS_REQUIRED) {
+            return { target: puzzleTarget, numbers };
+        }
+        if (needed !== Infinity && !fallback) fallback = { target: puzzleTarget, numbers };
     }
-    bag.push(25, 50, 75, 100);
+    return fallback;
+}
 
-    for (let i = bag.length - 1; i > 0; i--) {
-        const j = Math.floor(seededRandom(seed + i) * (i + 1));
-        [bag[i], bag[j]] = [bag[j], bag[i]];
+// Pour chaque sous-ensemble de nombres (bitmask), toutes les valeurs atteignables
+// en utilisant exactement ces nombres-là.
+function computeReachableBySubset(numbers) {
+    const full = 1 << numbers.length;
+    const sets = new Array(full);
+    for (let m = 1; m < full; m++) {
+        if ((m & (m - 1)) === 0) {
+            sets[m] = new Set([numbers[31 - Math.clz32(m)]]);
+            continue;
+        }
+        const values = new Set();
+        for (let a = (m - 1) & m; a > 0; a = (a - 1) & m) {
+            const b = m ^ a;
+            if (a < b) continue; // chaque découpage {a, b} une seule fois
+            for (const x of sets[a]) {
+                for (const y of sets[b]) {
+                    values.add(x + y);
+                    if (x * y <= MAX_INTERMEDIATE) values.add(x * y);
+                    if (x !== y) values.add(Math.abs(x - y));
+                    if (x % y === 0) values.add(x / y);
+                    else if (y % x === 0) values.add(y / x);
+                }
+            }
+        }
+        sets[m] = values;
     }
+    return sets;
+}
 
-    const numbers = bag.slice(0, 6);
-    const puzzleTarget = 100 + Math.floor(seededRandom(seed + 500) * 900);
+function minNumbersToReach(sets, value) {
+    let best = Infinity;
+    for (let m = 1; m < sets.length; m++) {
+        if (!sets[m].has(value)) continue;
+        let bits = 0;
+        for (let k = m; k; k >>= 1) bits += k & 1;
+        best = Math.min(best, bits);
+    }
+    return best;
+}
 
-    return { target: puzzleTarget, numbers };
+// Retrouve une suite d'opérations menant à la cible (affichée en fin de partie
+// quand le joueur ne l'a pas trouvée, pour montrer que c'était faisable).
+function findSolution(numbers, goal) {
+    const seen = new Set();
+    function search(values, steps) {
+        if (values.includes(goal)) return steps;
+        if (values.length < 2) return null;
+        const key = values.slice().sort((a, b) => a - b).join(',');
+        if (seen.has(key)) return null;
+        seen.add(key);
+        for (let i = 0; i < values.length; i++) {
+            for (let j = 0; j < values.length; j++) {
+                if (i === j) continue;
+                const x = values[i], y = values[j];
+                const candidates = [];
+                if (i < j) candidates.push([x + y, '+'], [x * y, '×']);
+                if (x > y) candidates.push([x - y, '−']);
+                if (y > 1 && x % y === 0) candidates.push([x / y, '÷']);
+                for (const [r, sym] of candidates) {
+                    const rest = values.filter((_, k) => k !== i && k !== j);
+                    rest.push(r);
+                    const found = search(rest, [...steps, `${x} ${sym} ${y} = ${r}`]);
+                    if (found) return found;
+                }
+            }
+        }
+        return null;
+    }
+    return search(numbers.slice(), []);
 }
 
 // ---------- Initialisation / animation d'intro ----------
@@ -443,10 +528,10 @@ function performOperationBetween(leftTile, rightTile, op) {
     updateOperatorButtonsState();
     updateValidateButtonState();
 
+    // Le compte est bon : victoire immédiate, sans avoir à cliquer sur Valider.
     if (resultValue === target) {
-        const targetEl = document.getElementById('mathoo-target');
-        targetEl.classList.add('reached');
-        showMessage('🎯 Le compte est bon ! Cliquez sur Valider pour confirmer.', 'success');
+        document.getElementById('mathoo-target').classList.add('reached');
+        endRound(resultValue);
     }
 }
 
@@ -514,6 +599,7 @@ function validate() {
 function endRound(finalValue) {
     gameEnded = true;
     stopTimer();
+    if (startTime) elapsedTime = Math.floor((Date.now() - startTime) / 1000);
 
     const distance = Math.abs(target - finalValue);
     const perfect = distance === 0;
@@ -529,7 +615,7 @@ function endRound(finalValue) {
 
     if (perfect) celebrate();
 
-    setTimeout(showResultModal, perfect ? 900 : 300);
+    setTimeout(showResultModal, perfect ? 1900 : 300);
 }
 
 // ---------- Rendu ----------
@@ -601,7 +687,13 @@ function blockGame() {
 // ---------- Célébration ----------
 
 function celebrate() {
-    for (let i = 0; i < 40; i++) {
+    const banner = document.createElement('div');
+    banner.className = 'mathoo-victory-banner';
+    banner.innerHTML = `<span>🎯 Le compte est bon !</span><small>⏱️ ${formatTime(elapsedTime)}</small>`;
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 1900);
+
+    for (let i = 0; i < 70; i++) {
         setTimeout(() => createConfetti(), i * 50);
     }
 }
@@ -659,6 +751,22 @@ function showResultModal() {
             chip.textContent = `${step.leftVal} ${step.opSymbol} ${step.rightVal} = ${step.resultVal}`;
             stepsContainer.appendChild(chip);
         });
+    }
+
+    if (!finalResult.perfect) {
+        const solution = findSolution(tiles.filter(t => !t.computed).map(t => t.value), target);
+        if (solution) {
+            const solutionEl = document.createElement('div');
+            solutionEl.className = 'mathoo-solution';
+            solutionEl.innerHTML = '<div class="mathoo-solution-label">💡 Une solution possible :</div>';
+            solution.forEach(step => {
+                const chip = document.createElement('span');
+                chip.className = 'mathoo-step-chip';
+                chip.textContent = step;
+                solutionEl.appendChild(chip);
+            });
+            stepsContainer.appendChild(solutionEl);
+        }
     }
 
     const modal = document.getElementById('mathoo-result-modal');
@@ -771,12 +879,12 @@ async function showLeaderboard() {
             if (rank <= 3) item.classList.add('top-3');
 
             const date = new Date(s.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-            const resultDisplay = s.perfect ? '🎯 Compte bon !' : `Écart : ${s.distance}`;
+            const resultDisplay = s.perfect ? '🎯 Compte bon' : `Écart ${s.distance}`;
 
             item.innerHTML = `
                 <div class="rank-col">${medal} ${rank}</div>
                 <div class="name-col">${escapeHtml(s.name)}</div>
-                <div class="time-col">${resultDisplay}</div>
+                <div class="time-col">${resultDisplay}<br><small class="lb-time">⏱️ ${formatTime(s.time || 0)}</small></div>
                 <div class="date-col">${date}</div>
             `;
 
@@ -784,7 +892,9 @@ async function showLeaderboard() {
         });
 
         if (gameEnded && finalResult) {
-            const userPosition = scores.findIndex(s => (s.distance || 0) >= finalResult.distance) + 1;
+            const userPosition = scores.findIndex(s =>
+                (s.distance || 0) > finalResult.distance ||
+                ((s.distance || 0) === finalResult.distance && (s.time || 0) >= finalResult.time)) + 1;
             const totalPlayers = scores.length;
             if (userPosition > 0) {
                 const percentile = Math.round((1 - (userPosition / totalPlayers)) * 100);

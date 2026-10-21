@@ -562,3 +562,9 @@ h1 {
         font-size: 1.15em !important;
     }
 }
+
+.lb-time {
+    font-size: 0.85em;
+    opacity: 0.75;
+    font-weight: 600;
+}

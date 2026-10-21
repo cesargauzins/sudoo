@@ -6,8 +6,8 @@
     <title>Rapidoo - Sudoo</title>
     <link rel="icon" type="image/png" href="lettro-icon.png">
     <link rel="apple-touch-icon" href="lettro-icon.png">
-    <link rel="stylesheet" href="common.css?v=20260930b">
-    <link rel="stylesheet" href="lettro.css?v=20260930c">
+    <link rel="stylesheet" href="common.css?v=20261021a">
+    <link rel="stylesheet" href="lettro.css?v=20261021a">
 </head>
 <body>
     <div class="container">
@@ -37,6 +37,8 @@
             <div class="lettro-go-flash" id="go-flash">GO !</div>
         </div>
 
+        <div class="lettro-full-word-hint">💎 Un mot de 12 lettres se cache dans la grille : ses points sont doublés !</div>
+
         <div class="lettro-input-row">
             <input type="text" id="word-input" placeholder="Tapez un mot..." maxlength="12" autocomplete="off" autocapitalize="characters" disabled />
             <button id="submit-word-btn" class="btn btn-primary">Valider</button>
@@ -60,6 +62,7 @@
                 <span class="timer-label">⭐ Score :</span>
                 <span id="result-score" class="final-time">0</span>
             </div>
+            <div class="lettro-result-full-word" id="result-full-word"></div>
             <div class="lettro-result-words" id="result-words-list"></div>
             <div class="name-input-container">
                 <label for="lettro-player-name">Entrez votre nom pour enregistrer votre score :</label>
@@ -92,6 +95,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="french-words.js?v=20261001a"></script>
-    <script src="lettro.js?v=20260930h"></script>
+    <script src="lettro.js?v=20261021a"></script>
 </body>
 </html>
