@@ -155,7 +155,7 @@ function areBothLevelsCompleted() {
 // Bloquer tous les puzzles si tous les niveaux sont terminés
 function blockAllPuzzles() {
     const messageEl = document.getElementById('message');
-    messageEl.innerHTML = '🎉 <strong>Bravo ! Vous avez terminé tous les niveaux aujourd’hui !</strong><br>Revenez demain pour de nouveaux défis ! 🚀';
+    messageEl.innerHTML = "🎉 <strong>Bravo ! Vous avez terminé tous les niveaux aujourd'hui !</strong><br>Revenez demain pour de nouveaux défis ! 🚀";
     messageEl.className = 'message success';
     messageEl.style.display = 'block';
     
@@ -170,7 +170,7 @@ function blockAllPuzzles() {
 function blockCurrentPuzzle() {
     const messageEl = document.getElementById('message');
     const levelName = DIFFICULTY_LEVELS[currentDifficulty].label;
-    messageEl.innerHTML = `🎉 <strong>Vous avez déjà terminé le niveau ${levelName} aujourd’hui !</strong><br>Essayez l'autre niveau ! 👆`;
+    messageEl.innerHTML = `🎉 <strong>Vous avez déjà terminé le niveau ${levelName} aujourd'hui !</strong><br>Essayez un autre niveau ! 👆`;
     messageEl.className = 'message success';
     messageEl.style.display = 'block';
     
@@ -334,6 +334,7 @@ function createPuzzle(completeGrid, seed, difficulty = 40) {
 // Initialiser le jeu
 function initializeGame() {
     updateGameControlsVisibility();
+    resetGameControls();
 
     if (currentDifficulty === 'blitz') {
         initializeBlitzGame();
@@ -373,6 +374,23 @@ function initializeGame() {
     
     // Lancer le compte à rebours de 3 secondes avant de démarrer le timer
     showCountdown();
+}
+
+// Une partie terminée (victoire, défaite, fin de Blitz) désactive les boutons et
+// une pause peut être restée active : on remet tout à neuf pour la nouvelle partie.
+function resetGameControls() {
+    isPaused = false;
+    isGameLost = false;
+    ['notes-btn', 'reset-btn', 'pause-btn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.disabled = false;
+    });
+    document.querySelectorAll('.number-btn, .erase-btn').forEach(btn => { btn.disabled = false; });
+    const pauseBtn = document.getElementById('pause-btn');
+    if (pauseBtn) {
+        pauseBtn.innerHTML = '⏸️ Pause';
+        pauseBtn.classList.remove('active');
+    }
 }
 
 // Afficher ou masquer les éléments spécifiques au mode Blitz
@@ -488,6 +506,7 @@ function showBlitzResultModal() {
     leaderboardModal.style.display = 'none';
 
     document.getElementById('blitz-final-count').textContent = blitzGridsCompleted;
+    document.getElementById('submit-blitz-score-btn').disabled = false;
 
     const modal = document.getElementById('blitz-result-modal');
     modal.style.display = 'flex';
@@ -514,7 +533,7 @@ async function submitBlitzScore() {
     const playerName = sanitizeName(rawName);
 
     if (!playerName || playerName.length < 2) {
-        showMessage('Veuillez entrer un nom valide (2-10 caractères) !', 'error');
+        showNameError('blitz-player-name');
         return;
     }
 
@@ -919,6 +938,9 @@ function setupEventListeners() {
     document.getElementById('view-leaderboard-btn').addEventListener('click', () => showLeaderboard('simple'));
     document.getElementById('submit-score-btn').addEventListener('click', submitScore);
     document.getElementById('skip-score-btn').addEventListener('click', closeNameModal);
+    document.getElementById('player-name').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submitScore();
+    });
     document.getElementById('close-leaderboard').addEventListener('click', closeLeaderboard);
     document.getElementById('view-solution-btn').addEventListener('click', showSolution);
     document.getElementById('submit-loss-score-btn').addEventListener('click', submitLossScore);
@@ -938,25 +960,13 @@ function setupEventListeners() {
         if (e.key === 'Enter') submitBlitzScore();
     });
 
-    // Fermer les modales en cliquant à l'extérieur
+    // Seul le classement se ferme en cliquant à l'extérieur : les fenêtres de fin de
+    // partie ne se ferment que par leurs boutons, pour ne pas perdre un score par un
+    // simple tap à côté (ex. pour fermer le clavier sur mobile).
     window.addEventListener('click', (e) => {
-        const nameModal = document.getElementById('name-modal');
-        const leaderboardModal = document.getElementById('leaderboard-modal');
-        const gameoverModal = document.getElementById('gameover-modal');
-        const blitzResultModal = document.getElementById('blitz-result-modal');
-        if (e.target === nameModal) {
-            closeNameModal();
-        }
-        if (e.target === leaderboardModal) {
+        if (e.target === document.getElementById('leaderboard-modal')) {
             closeLeaderboard();
         }
-        if (e.target === gameoverModal) {
-            // Ne pas permettre de fermer la modale game over
-        }
-        if (e.target === blitzResultModal) {
-            closeBlitzResultModal();
-        }
-        // Ne pas permettre de fermer la modale "À demain" en cliquant à l'extérieur
     });
 }
 
@@ -998,10 +1008,12 @@ function placeNumber(num) {
                 livesRemaining--;
                 updateLivesDisplay();
                 
-                // Après l'animation, effacer le chiffre
+                // Après l'animation, effacer le chiffre (sur cette case-là, même si le
+                // joueur a sélectionné une autre case entre-temps)
+                const wrongCell = selectedCell;
                 setTimeout(() => {
-                    selectedCell.classList.remove('error', 'user-input');
-                    selectedCell.textContent = '';
+                    wrongCell.classList.remove('error', 'user-input');
+                    wrongCell.textContent = '';
                     currentGrid[row][col] = 0;
                 }, 500);
                 
@@ -1443,7 +1455,7 @@ async function submitLossScore() {
     const playerName = sanitizeName(rawName);
 
     if (!playerName || playerName.length < 2) {
-        showMessage('Veuillez entrer un nom valide (2-10 caractères) !', 'error');
+        showNameError('loss-player-name');
         return;
     }
 
@@ -1563,6 +1575,8 @@ function showNameModal() {
     const minutes = Math.floor(finalTime / 60).toString().padStart(2, '0');
     const seconds = (finalTime % 60).toString().padStart(2, '0');
     finalTimeDisplay.textContent = `${minutes}:${seconds}`;
+    // Le bouton reste désactivé après un enregistrement précédent (autre niveau) : on le réactive
+    document.getElementById('submit-score-btn').disabled = false;
     modal.style.display = 'flex';
     modal.classList.add('show');
     document.getElementById('player-name').focus();
@@ -1588,7 +1602,7 @@ async function submitScore() {
     const playerName = sanitizeName(rawName);
 
     if (!playerName || playerName.length < 2) {
-        showMessage('Veuillez entrer un nom valide (2-10 caractères) !', 'error');
+        showNameError('player-name');
         return;
     }
 
@@ -1815,6 +1829,25 @@ function getOrdinalSuffix(num) {
 }
 
 // Nettoyer et valider le nom du joueur
+// Le message général est caché derrière la fenêtre : l'erreur de nom s'affiche
+// donc juste sous le champ, avec le champ en rouge.
+function showNameError(inputId) {
+    const input = document.getElementById(inputId);
+    let err = input.parentElement.querySelector('.name-error');
+    if (!err) {
+        err = document.createElement('div');
+        err.className = 'name-error';
+        input.insertAdjacentElement('afterend', err);
+    }
+    err.textContent = 'Entrez un nom de 2 à 10 caractères (lettres ou chiffres)';
+    input.classList.remove('invalid');
+    void input.offsetWidth;
+    input.classList.add('invalid');
+    input.focus();
+    clearTimeout(err._hideTimer);
+    err._hideTimer = setTimeout(() => { err.remove(); input.classList.remove('invalid'); }, 3500);
+}
+
 function sanitizeName(name) {
     // Supprimer les espaces au début et à la fin
     name = name.trim();

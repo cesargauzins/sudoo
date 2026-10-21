@@ -2037,3 +2037,23 @@ body.dark-mode .leaderboard-item:hover {
         display: none;
     }
 }
+
+
+.name-input-container input.invalid {
+    border-color: #ef5350;
+    box-shadow: 0 0 10px rgba(239, 83, 80, 0.3);
+    animation: nameShake 0.35s ease;
+}
+
+.name-error {
+    margin-top: 6px;
+    color: #d32f2f;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+@keyframes nameShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+}

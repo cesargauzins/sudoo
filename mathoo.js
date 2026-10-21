@@ -1,4 +1,4 @@
-// Mathoo — Le Compte est Bon : atteindre une cible (100-999) avec 6 nombres.
+// Mathoo — Le Compte est Bon : atteindre une cible (201-999) avec 6 nombres.
 
 let database = null;
 let target = 0;
@@ -271,7 +271,12 @@ function restartMathoo() {
 
     document.getElementById('timer').textContent = '00:00';
     document.getElementById('mathoo-steps').innerHTML = '';
-    document.getElementById('message').style.display = 'none';
+    // On efface le message "déjà joué" sans masquer la zone : elle doit rester
+    // disponible pour les messages suivants (opération invalide, etc.)
+    const messageEl = document.getElementById('message');
+    messageEl.style.display = '';
+    messageEl.className = 'message';
+    messageEl.textContent = '';
 
     const oldReplayBtn = document.getElementById('replay-practice-btn');
     if (oldReplayBtn) oldReplayBtn.remove();
@@ -663,7 +668,7 @@ function blockGame() {
     updateStreakDisplay();
 
     const messageEl = document.getElementById('message');
-    messageEl.innerHTML = '🎉 <strong>Vous avez déjà joué à Mathoo aujourd’hui !</strong><br>Revenez demain pour une nouvelle cible ! 🎯';
+    messageEl.innerHTML = '🎉 <strong>Vous avez déjà joué à Mathoo aujourd\'hui !</strong><br>Revenez demain pour une nouvelle cible ! 🎯';
     messageEl.className = 'message success';
     messageEl.style.display = 'block';
 
@@ -735,7 +740,9 @@ function showResultModal() {
 
     // Réaffiche le formulaire d'enregistrement (masqué après une soumission précédente)
     document.querySelector('#mathoo-result-modal .name-input-container').style.display = '';
-    document.getElementById('submit-mathoo-score-btn').style.display = '';
+    const submitBtn = document.getElementById('submit-mathoo-score-btn');
+    submitBtn.style.display = '';
+    submitBtn.disabled = false;
     const skipBtn = document.getElementById('skip-mathoo-score-btn');
     skipBtn.style.display = '';
     skipBtn.textContent = 'Passer';
@@ -790,7 +797,7 @@ async function submitMathooScore() {
     const playerName = sanitizeName(rawName);
 
     if (!playerName || playerName.length < 2) {
-        showMessage('Veuillez entrer un nom valide (2-10 caractères) !', 'error');
+        showNameError('mathoo-player-name');
         return;
     }
 
@@ -915,6 +922,25 @@ function closeLeaderboard() {
     const modal = document.getElementById('leaderboard-modal');
     modal.classList.remove('show');
     modal.style.display = 'none';
+}
+
+// Le message général est caché derrière la fenêtre : l'erreur de nom s'affiche
+// donc juste sous le champ, avec le champ en rouge.
+function showNameError(inputId) {
+    const input = document.getElementById(inputId);
+    let err = input.parentElement.querySelector('.name-error');
+    if (!err) {
+        err = document.createElement('div');
+        err.className = 'name-error';
+        input.insertAdjacentElement('afterend', err);
+    }
+    err.textContent = 'Entrez un nom de 2 à 10 caractères (lettres ou chiffres)';
+    input.classList.remove('invalid');
+    void input.offsetWidth;
+    input.classList.add('invalid');
+    input.focus();
+    clearTimeout(err._hideTimer);
+    err._hideTimer = setTimeout(() => { err.remove(); input.classList.remove('invalid'); }, 3500);
 }
 
 // ---------- Utilitaires ----------

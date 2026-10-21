@@ -452,11 +452,12 @@ function showMessage(text, type) {
 
 function blockGame() {
     const messageEl = document.getElementById('message');
-    messageEl.innerHTML = '🎉 <strong>Vous avez déjà joué à Rapidoo aujourd’hui !</strong><br>Revenez demain pour une nouvelle grille ! 🔤';
+    messageEl.innerHTML = '🎉 <strong>Vous avez déjà joué à Rapidoo aujourd\'hui !</strong><br>Revenez demain pour une nouvelle grille ! 🔤';
     messageEl.className = 'message success';
     messageEl.style.display = 'block';
 
-    document.querySelector('.lettro-grid').style.display = 'none';
+    document.querySelector('.lettro-grid-wrapper').style.display = 'none';
+    document.querySelector('.lettro-full-word-hint').style.display = 'none';
     document.querySelector('.lettro-input-row').style.display = 'none';
     document.getElementById('found-words').style.display = 'none';
     document.getElementById('go-flash').style.display = 'none';
@@ -509,6 +510,8 @@ function showResultModal() {
         ? '💎 Bravo, vous avez trouvé le mot de 12 lettres !'
         : `💎 Le mot de 12 lettres était : <strong>${fullGridWord.toUpperCase()}</strong>`;
 
+    document.getElementById('submit-lettro-score-btn').disabled = false;
+
     const modal = document.getElementById('lettro-result-modal');
     modal.style.display = 'flex';
     modal.classList.add('show');
@@ -530,7 +533,7 @@ async function submitLettroScore() {
     const playerName = sanitizeName(rawName);
 
     if (!playerName || playerName.length < 2) {
-        showMessage('Veuillez entrer un nom valide (2-10 caractères) !', 'error');
+        showNameError('lettro-player-name');
         return;
     }
 
@@ -646,6 +649,25 @@ function closeLeaderboard() {
     const modal = document.getElementById('leaderboard-modal');
     modal.classList.remove('show');
     modal.style.display = 'none';
+}
+
+// Le message général est caché derrière la fenêtre : l'erreur de nom s'affiche
+// donc juste sous le champ, avec le champ en rouge.
+function showNameError(inputId) {
+    const input = document.getElementById(inputId);
+    let err = input.parentElement.querySelector('.name-error');
+    if (!err) {
+        err = document.createElement('div');
+        err.className = 'name-error';
+        input.insertAdjacentElement('afterend', err);
+    }
+    err.textContent = 'Entrez un nom de 2 à 10 caractères (lettres ou chiffres)';
+    input.classList.remove('invalid');
+    void input.offsetWidth;
+    input.classList.add('invalid');
+    input.focus();
+    clearTimeout(err._hideTimer);
+    err._hideTimer = setTimeout(() => { err.remove(); input.classList.remove('invalid'); }, 3500);
 }
 
 // ---------- Utilitaires ----------

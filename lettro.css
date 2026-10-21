@@ -129,6 +129,7 @@
 
 .lettro-input-row input {
     flex: 1;
+    min-width: 0;
     padding: 12px 14px;
     font-size: 1.15em;
     font-weight: 600;

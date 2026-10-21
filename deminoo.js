@@ -563,7 +563,7 @@ function showMessage(text, type) {
 
 function blockGame() {
     const messageEl = document.getElementById('message');
-    messageEl.innerHTML = '🎉 <strong>Vous avez déjà joué à Deminoo aujourd’hui !</strong><br>Revenez demain pour une nouvelle grille ! 💣';
+    messageEl.innerHTML = '🎉 <strong>Vous avez déjà joué à Deminoo aujourd\'hui !</strong><br>Revenez demain pour une nouvelle grille ! 💣';
     messageEl.className = 'message success';
     messageEl.style.display = 'block';
 
@@ -609,7 +609,7 @@ function showResultModal() {
         titleEl.textContent = '💥 Boom !';
         titleEl.className = 'lost';
         textEl.textContent = finalResult.earlyDeath
-            ? `Vous êtes tombé sur une mine dès le ${moveCount}${moveCount === 1 ? 'er' : 'ème'} coup — pas de chance ! Vous pouvez rejouer cette grille.`
+            ? `Vous êtes tombé sur une mine dès le ${moveCount}${moveCount === 1 ? 'er' : 'ème'} coup — pas de chance ! Vous pouvez rejouer avec une nouvelle grille.`
             : 'Vous êtes tombé sur une mine.';
     }
 
@@ -617,6 +617,7 @@ function showResultModal() {
 
     const earlyReplayBtn = document.getElementById('replay-early-deminoo-btn');
     earlyReplayBtn.style.display = (!finalResult.won && finalResult.earlyDeath) ? 'block' : 'none';
+    document.getElementById('submit-deminoo-score-btn').disabled = false;
 
     const modal = document.getElementById('deminoo-result-modal');
     modal.style.display = 'flex';
@@ -639,7 +640,7 @@ async function submitDeminooScore() {
     const playerName = sanitizeName(rawName);
 
     if (!playerName || playerName.length < 2) {
-        showMessage('Veuillez entrer un nom valide (2-10 caractères) !', 'error');
+        showNameError('deminoo-player-name');
         return;
     }
 
@@ -762,6 +763,25 @@ function closeLeaderboard() {
     const modal = document.getElementById('leaderboard-modal');
     modal.classList.remove('show');
     modal.style.display = 'none';
+}
+
+// Le message général est caché derrière la fenêtre : l'erreur de nom s'affiche
+// donc juste sous le champ, avec le champ en rouge.
+function showNameError(inputId) {
+    const input = document.getElementById(inputId);
+    let err = input.parentElement.querySelector('.name-error');
+    if (!err) {
+        err = document.createElement('div');
+        err.className = 'name-error';
+        input.insertAdjacentElement('afterend', err);
+    }
+    err.textContent = 'Entrez un nom de 2 à 10 caractères (lettres ou chiffres)';
+    input.classList.remove('invalid');
+    void input.offsetWidth;
+    input.classList.add('invalid');
+    input.focus();
+    clearTimeout(err._hideTimer);
+    err._hideTimer = setTimeout(() => { err.remove(); input.classList.remove('invalid'); }, 3500);
 }
 
 // ---------- Utilitaires ----------

@@ -81,10 +81,6 @@
 .deminoo-cell.n7 { color: #333333; }
 .deminoo-cell.n8 { color: #757575; }
 
-.deminoo-flag-toggle {
-    margin-bottom: 8px;
-}
-
 .deminoo-flag-toggle.active {
     background: #8e24aa;
     box-shadow: 0 0 15px rgba(171, 71, 188, 0.6);
